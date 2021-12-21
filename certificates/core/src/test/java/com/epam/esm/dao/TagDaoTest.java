@@ -1,4 +1,4 @@
-package com.epam.esm.repository;
+package com.epam.esm.dao;
 
 import com.epam.esm.configuration.TestCoreConfiguration;
 import com.epam.esm.entity.Tag;
@@ -22,10 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @ActiveProfiles("dev")
 @ExtendWith(SpringExtension.class)
-public class TagRepositoryTest {
+public class TagDaoTest {
 
     @Autowired
-    private TagRepository repository;
+    private TagDao repository;
 
     @Test
     public void shouldAddTagWhenExists() throws RepositoryException {

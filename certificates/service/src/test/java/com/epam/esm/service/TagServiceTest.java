@@ -7,7 +7,7 @@ import com.epam.esm.exception.RepositoryException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ResourceNotFoundServiceException;
 import com.epam.esm.exception.ServiceException;
-import com.epam.esm.repository.TagRepository;
+import com.epam.esm.dao.TagDao;
 import com.epam.esm.service.impl.TagServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ public class TagServiceTest {
     private TagServiceImpl service;
 
     @Mock
-    private TagRepository tagRepository;
+    private TagDao tagRepository;
 
     private final List<TagDto> dtos = new ArrayList<>();
     private final List<Tag> tags = new ArrayList<>();

@@ -1,11 +1,11 @@
-package com.epam.esm.repository.impl;
+package com.epam.esm.dao.impl;
 
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.exception.RepositoryException;
 import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.repository.GiftCertificateRepository;
-import com.epam.esm.repository.impl.builder.GiftCertificateRequestBuilder;
-import com.epam.esm.repository.impl.mapper.GiftCertificateRowMapper;
+import com.epam.esm.dao.GiftCertificateDao;
+import com.epam.esm.dao.impl.builder.GiftCertificateRequestBuilder;
+import com.epam.esm.dao.impl.mapper.GiftCertificateRowMapper;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @Repository
-public class JdbcGiftCertificateRepository implements GiftCertificateRepository {
+public class JdbcGiftCertificateDao implements GiftCertificateDao {
 
     private static final String INSERT_CERTIFICATE_SQL = "INSERT INTO gift_certificate (name, description, "
         + "price, duration, create_date, last_update_date) VALUES(?,?,?,?,?,?)";
@@ -40,7 +40,7 @@ public class JdbcGiftCertificateRepository implements GiftCertificateRepository 
     private final JdbcTemplate jdbcTemplate;
     private final GiftCertificateRowMapper certificateRowMapper;
 
-    public JdbcGiftCertificateRepository(JdbcTemplate jdbcTemplate) {
+    public JdbcGiftCertificateDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.certificateRowMapper = new GiftCertificateRowMapper();
     }

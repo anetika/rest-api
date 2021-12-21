@@ -1,4 +1,4 @@
-package com.epam.esm.repository;
+package com.epam.esm.dao;
 
 import com.epam.esm.configuration.TestCoreConfiguration;
 import com.epam.esm.entity.GiftCertificate;
@@ -27,9 +27,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @ActiveProfiles("dev")
 @ExtendWith(SpringExtension.class)
-public class GiftCertificateRepositoryTest {
+public class GiftCertificateDaoTest {
     @Autowired
-    GiftCertificateRepository repository;
+    GiftCertificateDao repository;
 
     @Test
     public void shouldAddCertificateWhenExists() throws RepositoryException {

@@ -1,10 +1,10 @@
-package com.epam.esm.repository.impl;
+package com.epam.esm.dao.impl;
 
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.RepositoryException;
 import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.repository.TagRepository;
-import com.epam.esm.repository.impl.mapper.TagRowMapper;
+import com.epam.esm.dao.TagDao;
+import com.epam.esm.dao.impl.mapper.TagRowMapper;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,7 +18,7 @@ import java.sql.Statement;
 import java.util.List;
 
 @Repository
-public class JdbcTagRepository implements TagRepository {
+public class JdbcTagDao implements TagDao {
 
     private static final String INSERT_TAG_SQL = "INSERT INTO tag (name) VALUES(?)";
     private static final String GET_TAG_BY_ID_SQL = "SELECT id, name FROM tag WHERE id = ?";
@@ -32,7 +32,7 @@ public class JdbcTagRepository implements TagRepository {
     private final JdbcTemplate jdbcTemplate;
     private final TagRowMapper tagRowMapper;
 
-    public JdbcTagRepository(JdbcTemplate jdbcTemplate) {
+    public JdbcTagDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.tagRowMapper = new TagRowMapper();
     }

@@ -7,7 +7,7 @@ import com.epam.esm.exception.RepositoryException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ResourceNotFoundServiceException;
 import com.epam.esm.exception.ServiceException;
-import com.epam.esm.repository.TagRepository;
+import com.epam.esm.dao.TagDao;
 import com.epam.esm.service.TagService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,10 +18,10 @@ import java.util.stream.Collectors;
 @Service
 public class TagServiceImpl implements TagService {
 
-    private final TagRepository repository;
+    private final TagDao repository;
     private final TagConverter converter;
 
-    public TagServiceImpl(TagRepository repository) {
+    public TagServiceImpl(TagDao repository) {
         this.repository = repository;
         this.converter = TagConverter.getInstance();
     }
@@ -63,6 +63,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    @Transactional
     public void delete(long id) throws ServiceException, ResourceNotFoundServiceException {
         try {
             try{

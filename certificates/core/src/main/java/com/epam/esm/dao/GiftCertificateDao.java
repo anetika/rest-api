@@ -1,4 +1,4 @@
-package com.epam.esm.repository;
+package com.epam.esm.dao;
 
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.exception.RepositoryException;
@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * The interface that contains functionality for GiftCertificateRepository
  */
-public interface GiftCertificateRepository extends CRDRepository<GiftCertificate> {
+public interface GiftCertificateDao extends CRDDao<GiftCertificate> {
     /**
      * Updates gift certificate.
      *

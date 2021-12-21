@@ -1,4 +1,4 @@
-package com.epam.esm.repository;
+package com.epam.esm.dao;
 
 
 import com.epam.esm.entity.Entity;
@@ -10,7 +10,7 @@ import com.epam.esm.exception.ResourceNotFoundException;
  *
  * @param <T> the type parameter
  */
-public interface CRDRepository<T extends Entity> {
+public interface CRDDao<T extends Entity> {
     /**
      * Adds an item to repository
      *

@@ -1,4 +1,4 @@
-package com.epam.esm.repository;
+package com.epam.esm.dao;
 
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.RepositoryException;
@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * The interface that contains functionality for TagRepository
  */
-public interface TagRepository extends CRDRepository<Tag>{
+public interface TagDao extends CRDDao<Tag> {
     /**
      * Gets tag by name.
      *

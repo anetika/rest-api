@@ -8,8 +8,8 @@ import com.epam.esm.exception.RepositoryException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ResourceNotFoundServiceException;
 import com.epam.esm.exception.ServiceException;
-import com.epam.esm.repository.GiftCertificateRepository;
-import com.epam.esm.repository.TagRepository;
+import com.epam.esm.dao.GiftCertificateDao;
+import com.epam.esm.dao.TagDao;
 import com.epam.esm.service.GiftCertificateService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,11 +22,11 @@ import java.util.stream.Collectors;
 
 @Service
 public class GiftCertificateServiceImpl implements GiftCertificateService {
-    private final GiftCertificateRepository certificateRepository;
-    private final TagRepository tagRepository;
+    private final GiftCertificateDao certificateRepository;
+    private final TagDao tagRepository;
     private final GiftCertificateConverter converter;
 
-    public GiftCertificateServiceImpl(GiftCertificateRepository certificateRepository, TagRepository tagRepository) {
+    public GiftCertificateServiceImpl(GiftCertificateDao certificateRepository, TagDao tagRepository) {
         this.certificateRepository = certificateRepository;
         this.tagRepository = tagRepository;
         this.converter = GiftCertificateConverter.getInstance();

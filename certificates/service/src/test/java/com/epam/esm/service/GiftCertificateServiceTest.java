@@ -7,8 +7,8 @@ import com.epam.esm.exception.RepositoryException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ResourceNotFoundServiceException;
 import com.epam.esm.exception.ServiceException;
-import com.epam.esm.repository.GiftCertificateRepository;
-import com.epam.esm.repository.TagRepository;
+import com.epam.esm.dao.GiftCertificateDao;
+import com.epam.esm.dao.TagDao;
 import com.epam.esm.service.impl.GiftCertificateServiceImpl;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,10 +40,10 @@ public class GiftCertificateServiceTest {
     private GiftCertificateServiceImpl service;
 
     @Mock
-    private GiftCertificateRepository repository;
+    private GiftCertificateDao repository;
 
     @Mock
-    private TagRepository tagRepository;
+    private TagDao tagRepository;
 
     private final List<GiftCertificateDto> dtos = new ArrayList<>();
 
