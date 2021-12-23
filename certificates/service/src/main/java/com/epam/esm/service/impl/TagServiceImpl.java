@@ -3,12 +3,10 @@ package com.epam.esm.service.impl;
 import com.epam.esm.converter.TagConverter;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.Tag;
-import com.epam.esm.exception.RepositoryException;
-import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.ResourceNotFoundServiceException;
-import com.epam.esm.exception.ServiceException;
+import com.epam.esm.exception.*;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.service.TagService;
+import com.epam.esm.validator.TagValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,15 +18,20 @@ public class TagServiceImpl implements TagService {
 
     private final TagDao repository;
     private final TagConverter converter;
+    private final TagValidator validator;
 
     public TagServiceImpl(TagDao repository) {
         this.repository = repository;
         this.converter = TagConverter.getInstance();
+        this.validator = TagValidator.getInstance();
     }
 
     @Override
     @Transactional
-    public TagDto add(TagDto item) throws ServiceException {
+    public TagDto add(TagDto item) throws ServiceException, ValidationException {
+        if (!validator.validateTag(item)){
+            throw new ValidationException("TagDto isn't valid!");
+        }
         Tag tag = converter.convertDtoToEntity(item);
         try{
             try {

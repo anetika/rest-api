@@ -3,11 +3,13 @@ package com.epam.esm.exceptionhandler;
 import com.epam.esm.configuration.Translator;
 import com.epam.esm.exception.ResourceNotFoundServiceException;
 import com.epam.esm.exception.ServiceException;
+import com.epam.esm.exception.ValidationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
 @ControllerAdvice
 public class CustomExceptionHandler {
 
@@ -29,6 +31,14 @@ public class CustomExceptionHandler {
     public ResponseEntity<String> handleResourceNotFoundException(ResourceNotFoundServiceException e){
         String message = translator.toLocale("error404_message");
         ResponseEntity<String> responseEntity = new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
+        changeResponseCharset(responseEntity);
+        return responseEntity;
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<String> handleValidationException(ValidationException e){
+        String message = translator.toLocale("validation_error_message");
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
         changeResponseCharset(responseEntity);
         return responseEntity;
     }

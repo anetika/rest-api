@@ -4,7 +4,9 @@ import com.epam.esm.configuration.Translator;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.exception.ResourceNotFoundServiceException;
 import com.epam.esm.exception.ServiceException;
+import com.epam.esm.exception.ValidationException;
 import com.epam.esm.service.TagService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +25,7 @@ public class TagController {
     }
 
     @PostMapping
-    public ResponseEntity<TagDto> add(@RequestBody TagDto dto) throws ServiceException {
+    public ResponseEntity<TagDto> add(@RequestBody TagDto dto) throws ServiceException, ValidationException {
         dto = service.add(dto);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
@@ -47,13 +49,22 @@ public class TagController {
     public ResponseEntity<String> delete(@PathVariable("id") long id) throws ServiceException, ResourceNotFoundServiceException {
         service.delete(id);
         String message = translator.toLocale("tag_delete");
-        return new ResponseEntity<>(message, HttpStatus.OK);
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(message, HttpStatus.OK);
+        changeResponseCharset(responseEntity);
+        return responseEntity;
     }
 
     @DeleteMapping
     public ResponseEntity<String> deleteAll() throws ServiceException {
         service.deleteAll();
         String message = translator.toLocale("tags_delete");
-        return new ResponseEntity<>(message, HttpStatus.OK);
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(message, HttpStatus.OK);
+        changeResponseCharset(responseEntity);
+        return responseEntity;
+    }
+
+    private void changeResponseCharset(ResponseEntity<String> responseEntity){
+        HttpHeaders httpHeaders = HttpHeaders.writableHttpHeaders(responseEntity.getHeaders());
+        httpHeaders.add("Content-Type", "text/plain;charset=UTF-8");
     }
 }

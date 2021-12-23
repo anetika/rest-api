@@ -3,10 +3,7 @@ package com.epam.esm.service;
 import com.epam.esm.converter.GiftCertificateConverter;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.exception.RepositoryException;
-import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.ResourceNotFoundServiceException;
-import com.epam.esm.exception.ServiceException;
+import com.epam.esm.exception.*;
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.service.impl.GiftCertificateServiceImpl;
@@ -106,7 +103,7 @@ public class GiftCertificateServiceTest {
     }
 
     @Test
-    public void shouldAddCertificateWhenExists() throws RepositoryException, ServiceException {
+    public void shouldAddCertificateWhenExists() throws RepositoryException, ServiceException, ValidationException {
         when(repository.add(any())).thenReturn(certificates.get(0));
         GiftCertificateDto certificateDto = service.add(dtos.get(0));
         assertEquals(certificateDto, dtos.get(0));
@@ -154,7 +151,7 @@ public class GiftCertificateServiceTest {
     }
 
     @Test
-    public void shouldUpdateCertificateWhenExists() throws ResourceNotFoundException, RepositoryException, ServiceException, ResourceNotFoundServiceException {
+    public void shouldUpdateCertificateWhenExists() throws ResourceNotFoundException, RepositoryException, ServiceException, ResourceNotFoundServiceException, ValidationException {
         when(repository.update(1, certificates.get(0))).thenReturn(certificates.get(1));
         GiftCertificateDto certificateDto = service.update(1, dtos.get(0));
         assertEquals(certificateDto, dtos.get(1));

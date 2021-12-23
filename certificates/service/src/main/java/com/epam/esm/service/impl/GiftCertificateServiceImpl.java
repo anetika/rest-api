@@ -4,13 +4,11 @@ import com.epam.esm.converter.GiftCertificateConverter;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
-import com.epam.esm.exception.RepositoryException;
-import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.ResourceNotFoundServiceException;
-import com.epam.esm.exception.ServiceException;
+import com.epam.esm.exception.*;
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.service.GiftCertificateService;
+import com.epam.esm.validator.GiftCertificateValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,16 +23,21 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     private final GiftCertificateDao certificateRepository;
     private final TagDao tagRepository;
     private final GiftCertificateConverter converter;
+    private final GiftCertificateValidator validator;
 
     public GiftCertificateServiceImpl(GiftCertificateDao certificateRepository, TagDao tagRepository) {
         this.certificateRepository = certificateRepository;
         this.tagRepository = tagRepository;
         this.converter = GiftCertificateConverter.getInstance();
+        this.validator = GiftCertificateValidator.getInstance();
     }
 
     @Override
     @Transactional
-    public GiftCertificateDto add(GiftCertificateDto item) throws ServiceException {
+    public GiftCertificateDto add(GiftCertificateDto item) throws ServiceException, ValidationException {
+        if (!validator.validateGiftCertificate(item)){
+            throw new ValidationException("GiftCertificateDto isn't valid");
+        }
         try {
             GiftCertificate certificate = converter.convertDtoToEntity(item);
             certificate.setCreateDate(LocalDateTime.now());
@@ -107,7 +110,10 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     @Transactional
-    public GiftCertificateDto update(long id, GiftCertificateDto certificateDto) throws ServiceException, ResourceNotFoundServiceException {
+    public GiftCertificateDto update(long id, GiftCertificateDto certificateDto) throws ServiceException, ResourceNotFoundServiceException, ValidationException {
+        if (!validator.validateGiftCertificate(certificateDto)){
+            throw new ValidationException("GiftCertificateDto isn't valid!");
+        }
         try {
             GiftCertificate certificate = converter.convertDtoToEntity(certificateDto);
             GiftCertificate updatedCertificate = certificateRepository.update(id, certificate);

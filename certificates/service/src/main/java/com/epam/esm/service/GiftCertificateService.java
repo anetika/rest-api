@@ -3,6 +3,8 @@ package com.epam.esm.service;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.exception.ResourceNotFoundServiceException;
 import com.epam.esm.exception.ServiceException;
+import com.epam.esm.exception.ValidationException;
+
 import java.util.List;
 import java.util.Map;
 
@@ -28,5 +30,5 @@ public interface GiftCertificateService extends CRDService<GiftCertificateDto> {
      * @throws ServiceException                 the service exception
      * @throws ResourceNotFoundServiceException the resource not found service exception
      */
-    GiftCertificateDto update(long id, GiftCertificateDto certificateDto) throws ServiceException, ResourceNotFoundServiceException;
+    GiftCertificateDto update(long id, GiftCertificateDto certificateDto) throws ServiceException, ResourceNotFoundServiceException, ValidationException;
 }

@@ -3,10 +3,7 @@ package com.epam.esm.service;
 import com.epam.esm.converter.TagConverter;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.Tag;
-import com.epam.esm.exception.RepositoryException;
-import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.ResourceNotFoundServiceException;
-import com.epam.esm.exception.ServiceException;
+import com.epam.esm.exception.*;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.service.impl.TagServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -74,7 +71,7 @@ public class TagServiceTest {
     }
 
     @Test
-    public void shouldAddTagWhenExists() throws RepositoryException, ServiceException, ResourceNotFoundException {
+    public void shouldAddTagWhenExists() throws RepositoryException, ServiceException, ResourceNotFoundException, ValidationException {
         when(tagRepository.add(any())).thenReturn(tags.get(0));
         when(tagRepository.getByName(any())).thenThrow(ResourceNotFoundException.class);
         TagDto tagDto = service.add(dtos.get(0));

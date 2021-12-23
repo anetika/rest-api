@@ -5,6 +5,7 @@ import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ResourceNotFoundServiceException;
 import com.epam.esm.exception.ServiceException;
+import com.epam.esm.exception.ValidationException;
 
 import java.util.List;
 
@@ -21,7 +22,7 @@ public interface CRDService<T extends Dto> {
      * @return an item
      * @throws ServiceException the service exception
      */
-    T add(T item) throws ServiceException;
+    T add(T item) throws ServiceException, ValidationException;
 
     /**
      * Gets an item by id.
