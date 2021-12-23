@@ -1,0 +1,12 @@
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+dependencies {
+    implementation project(':core')
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.1.0'
+    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '4.1.0'
+}
+
+test {
+    useJUnitPlatform()
+}

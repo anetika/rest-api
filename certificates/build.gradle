@@ -1,0 +1,22 @@
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+allprojects {
+    apply plugin: 'java'
+    sourceCompatibility = '11'
+    targetCompatibility = '11'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        implementation group: 'org.springframework', name: 'spring-core', version: '5.3.13'
+        implementation group: 'org.springframework', name: 'spring-context', version: '5.3.13'
+        implementation group: 'org.springframework', name: 'spring-jdbc', version: '5.3.13'
+        testImplementation group: 'org.springframework', name: 'spring-test', version: '5.3.13'
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+        implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.3'
+        implementation 'org.projectlombok:lombok:1.18.20'
+        annotationProcessor 'org.projectlombok:lombok:1.18.20'
+    }
+}
