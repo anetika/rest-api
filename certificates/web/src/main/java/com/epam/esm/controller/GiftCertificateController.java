@@ -30,7 +30,7 @@ public class GiftCertificateController {
     @PostMapping
     public ResponseEntity<GiftCertificateDto> add(@RequestBody GiftCertificateDto certificateDto) throws ServiceException, ValidationException {
         certificateDto = service.add(certificateDto);
-        return new ResponseEntity<>(certificateDto, HttpStatus.OK);
+        return new ResponseEntity<>(certificateDto, HttpStatus.CREATED);
     }
 
     @GetMapping(value = "/{id}")
@@ -42,7 +42,7 @@ public class GiftCertificateController {
     @GetMapping
     public ResponseEntity<List<GiftCertificateDto>> getAllGiftCertificates(
             @RequestParam(value = "tag", defaultValue = "", required = false) String tag,
-            @RequestParam(value = "search", defaultValue = "", required = false) String search,
+            @RequestParam(value = "name_search", defaultValue = "", required = false) String search,
             @RequestParam(value = "sort", defaultValue = "", required = false) String sort
     ) throws ServiceException {
         Map<String, String> params = new HashMap<>();

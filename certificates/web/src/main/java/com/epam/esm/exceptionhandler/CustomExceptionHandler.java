@@ -37,7 +37,7 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<String> handleValidationException(ValidationException e){
-        String message = translator.toLocale("validation_error_message");
+        String message = translator.toLocale(e.getMessage());
         ResponseEntity<String> responseEntity = new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
         changeResponseCharset(responseEntity);
         return responseEntity;

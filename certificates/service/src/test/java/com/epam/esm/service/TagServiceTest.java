@@ -36,7 +36,7 @@ public class TagServiceTest {
 
     @BeforeEach
     public void setUpDtos() {
-        TagConverter converter = TagConverter.getInstance();
+        TagConverter converter = new TagConverter();
 
         TagDto dto1 = new TagDto();
         dto1.setId(1);

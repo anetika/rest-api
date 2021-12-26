@@ -12,7 +12,6 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;
@@ -48,7 +47,7 @@ public class JdbcTagDao implements TagDao {
             }, keyHolder);
 
             if (keyHolder.getKey() != null){
-                item.setId((BigInteger.valueOf(Long.valueOf(keyHolder.getKey().toString()))).longValue());
+                item.setId(keyHolder.getKey().longValue());
             }
             return item;
         } catch (DataAccessException e) {

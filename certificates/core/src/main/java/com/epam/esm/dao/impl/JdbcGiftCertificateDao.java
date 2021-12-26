@@ -13,14 +13,10 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Repository
 public class JdbcGiftCertificateDao implements GiftCertificateDao {
@@ -29,14 +25,13 @@ public class JdbcGiftCertificateDao implements GiftCertificateDao {
         + "price, duration, create_date, last_update_date) VALUES(?,?,?,?,?,?)";
     private static final String GET_CERTIFICATE_BY_ID_SQL = "SELECT id, name, description, "
         + "price, duration, create_date, last_update_date FROM gift_certificate WHERE id = ?";
-    private static final String GET_ALL_CERTIFICATES_SQL = "SELECT id, name, description, "
-            + "price, duration, create_date, last_update_date FROM gift_certificate";
     private static final String DELETE_CERTIFICATE_BY_ID_SQL = "DELETE FROM gift_certificate WHERE id = ?";
     private static final String DELETE_ALL_CERTIFICATES_SQL = "DELETE FROM gift_certificate";
     private static final String UPDATE_CERTIFICATE_SQL = "UPDATE gift_certificate SET gift_certificate.name = ?, description = ?, "
         + "price = ?, duration = ?, create_date = ?, last_update_date = ? WHERE id = ?";
     private static final String INSERT_CERTIFICATE_TAG_CONNECTION_SQL = "INSERT INTO gift_certificate_tag (certificate_id, tag_id) " +
             "VALUES(?, ?)";
+    private static final String DELETE_CERTIFICATE_TAG_CONNECTION_SQL = "DELETE FROM gift_certificate_tag WHERE certificate_id = ? AND tag_id = ?";
     private final JdbcTemplate jdbcTemplate;
     private final GiftCertificateRowMapper certificateRowMapper;
 
@@ -61,7 +56,7 @@ public class JdbcGiftCertificateDao implements GiftCertificateDao {
             }, keyHolder);
 
             if (keyHolder.getKey() != null){
-                item.setId((BigInteger.valueOf(Long.valueOf(keyHolder.getKey().toString()))).longValue());
+                item.setId(keyHolder.getKey().longValue());
             }
             return item;
         } catch (DataAccessException e) {
@@ -111,53 +106,10 @@ public class JdbcGiftCertificateDao implements GiftCertificateDao {
     @Override
     public GiftCertificate update(long id, GiftCertificate updatedCertificate) throws RepositoryException, ResourceNotFoundException {
         try {
-
-            GiftCertificate initialCertificate = getById(id);
-            String initialName = initialCertificate.getName();
-            String updatedName = updatedCertificate.getName();
-            if (updatedName != null && !Objects.equals(initialName, updatedName)) {
-                initialCertificate.setName(updatedName);
-            }
-
-            String initialDescription = initialCertificate.getDescription();
-            String updatedDescription = updatedCertificate.getDescription();
-            if (updatedDescription != null && !Objects.equals(initialDescription, updatedDescription)) {
-                initialCertificate.setDescription(updatedDescription);
-            }
-
-            BigDecimal initialPrice = initialCertificate.getPrice();
-            BigDecimal updatedPrice = updatedCertificate.getPrice();
-            if (updatedPrice != null && !Objects.equals(initialPrice, updatedPrice)) {
-                initialCertificate.setPrice(updatedPrice);
-            }
-
-            int initialDuration = initialCertificate.getDuration();
-            int updatedDuration = updatedCertificate.getDuration();
-            if (updatedDuration != 0 && !Objects.equals(initialDuration, updatedDuration)) {
-                initialCertificate.setDuration(updatedDuration);
-            }
-
-            LocalDateTime initialCreateDate = initialCertificate.getCreateDate();
-            LocalDateTime updatedCreateDate = initialCertificate.getCreateDate();
-            if (updatedCreateDate != null && initialCreateDate != updatedCreateDate) {
-                initialCertificate.setCreateDate(updatedCreateDate);
-            }
-
-            LocalDateTime initialLastUpdateDate = initialCertificate.getLastUpdateDate();
-            LocalDateTime updatedLastUpdateDate = updatedCertificate.getLastUpdateDate();
-            if (updatedLastUpdateDate != null && initialLastUpdateDate != updatedLastUpdateDate) {
-                initialCertificate.setLastUpdateDate(updatedLastUpdateDate);
-            }
-
-            if (updatedCertificate.getTags() != null){
-                initialCertificate.setTags(updatedCertificate.getTags());
-            }
-
-            jdbcTemplate.update(UPDATE_CERTIFICATE_SQL, initialCertificate.getName(), initialCertificate.getDescription(),
-                    initialCertificate.getPrice(), initialCertificate.getDuration(), initialCertificate.getCreateDate(),
-                    initialCertificate.getLastUpdateDate(), id);
-            return initialCertificate;
-
+            jdbcTemplate.update(UPDATE_CERTIFICATE_SQL, updatedCertificate.getName(), updatedCertificate.getDescription(),
+                    updatedCertificate.getPrice(), updatedCertificate.getDuration(), updatedCertificate.getCreateDate(),
+                    updatedCertificate.getLastUpdateDate(), id);
+            return updatedCertificate;
         } catch (IncorrectResultSizeDataAccessException e) {
             throw new ResourceNotFoundException("Resource not found in JdbcGiftCertificateRepository", e);
         } catch (DataAccessException e) {
@@ -171,6 +123,15 @@ public class JdbcGiftCertificateDao implements GiftCertificateDao {
             jdbcTemplate.update(INSERT_CERTIFICATE_TAG_CONNECTION_SQL, certificateId, tagId);
         } catch (DataAccessException e){
             throw new RepositoryException("Unable to handle addCertificateTagConnection request in JdbcGiftCertificateRepository", e);
+        }
+    }
+
+    @Override
+    public void deleteGiftCertificateTagConnection(long certificateId, long tagId) {
+        try{
+            jdbcTemplate.update(DELETE_CERTIFICATE_TAG_CONNECTION_SQL, certificateId, tagId);
+        } catch (DataAccessException e){
+            throw new RepositoryException("Unable to handle deleteGiftCertificateTagConnection request in JdbcGiftCertificateDao", e);
         }
     }
 

@@ -9,15 +9,6 @@ import org.springframework.context.annotation.Profile;
 
 @Configuration
 @ComponentScan("com.epam.esm")
-@Profile("prod")
 public class ServiceConfiguration {
-
-    @Bean
-    public TagConverter tagConverter(){
-        return TagConverter.getInstance();
-    }
-
-    @Bean
-    public GiftCertificateConverter giftCertificateConverter() {return GiftCertificateConverter.getInstance();}
 
 }

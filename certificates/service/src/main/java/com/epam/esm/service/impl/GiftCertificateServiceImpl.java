@@ -1,6 +1,7 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.converter.GiftCertificateConverter;
+import com.epam.esm.converter.TagConverter;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
@@ -12,10 +13,12 @@ import com.epam.esm.validator.GiftCertificateValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,16 +31,14 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     public GiftCertificateServiceImpl(GiftCertificateDao certificateRepository, TagDao tagRepository) {
         this.certificateRepository = certificateRepository;
         this.tagRepository = tagRepository;
-        this.converter = GiftCertificateConverter.getInstance();
+        this.converter = new GiftCertificateConverter(new TagConverter());
         this.validator = GiftCertificateValidator.getInstance();
     }
 
     @Override
     @Transactional
     public GiftCertificateDto add(GiftCertificateDto item) throws ServiceException, ValidationException {
-        if (!validator.validateGiftCertificate(item)){
-            throw new ValidationException("GiftCertificateDto isn't valid");
-        }
+        validator.validateGiftCertificate(item);
         try {
             GiftCertificate certificate = converter.convertDtoToEntity(item);
             certificate.setCreateDate(LocalDateTime.now());
@@ -111,18 +112,65 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     @Override
     @Transactional
     public GiftCertificateDto update(long id, GiftCertificateDto certificateDto) throws ServiceException, ResourceNotFoundServiceException, ValidationException {
-        if (!validator.validateGiftCertificate(certificateDto)){
-            throw new ValidationException("GiftCertificateDto isn't valid!");
-        }
+        validator.validateUpdatedGiftCertificate(certificateDto);
         try {
             GiftCertificate certificate = converter.convertDtoToEntity(certificateDto);
-            GiftCertificate updatedCertificate = certificateRepository.update(id, certificate);
-            updatedCertificate.setTags(addTagsIfNotExist(updatedCertificate.getTags(), updatedCertificate.getId()));
+            GiftCertificate initialCertificate = certificateRepository.getById(id);
+            String initialName = initialCertificate.getName();
+            String updatedName = certificate.getName();
+            if (updatedName != null && !Objects.equals(initialName, updatedName)) {
+                initialCertificate.setName(updatedName);
+            }
+
+            String initialDescription = initialCertificate.getDescription();
+            String updatedDescription = certificate.getDescription();
+            if (updatedDescription != null && !Objects.equals(initialDescription, updatedDescription)) {
+                initialCertificate.setDescription(updatedDescription);
+            }
+
+            BigDecimal initialPrice = initialCertificate.getPrice();
+            BigDecimal updatedPrice = certificate.getPrice();
+            if (updatedPrice != null && !Objects.equals(initialPrice, updatedPrice)) {
+                initialCertificate.setPrice(updatedPrice);
+            }
+
+            int initialDuration = initialCertificate.getDuration();
+            int updatedDuration = certificate.getDuration();
+            if (updatedDuration != 0 && !Objects.equals(initialDuration, updatedDuration)) {
+                initialCertificate.setDuration(updatedDuration);
+            }
+
+            LocalDateTime initialCreateDate = initialCertificate.getCreateDate();
+            LocalDateTime updatedCreateDate = initialCertificate.getCreateDate();
+            if (updatedCreateDate != null && !initialCreateDate.equals(updatedCreateDate)) {
+                initialCertificate.setCreateDate(updatedCreateDate);
+            }
+
+            LocalDateTime initialLastUpdateDate = initialCertificate.getLastUpdateDate();
+            LocalDateTime updatedLastUpdateDate = certificate.getLastUpdateDate();
+            if (updatedLastUpdateDate != null && !initialLastUpdateDate.equals(updatedLastUpdateDate)) {
+                initialCertificate.setLastUpdateDate(updatedLastUpdateDate);
+            }
+
+            if (certificate.getTags() != null){
+                deleteOldTags(initialCertificate.getId(), tagRepository.getAllTagsByCertificateId(initialCertificate.getId()));
+                initialCertificate.setTags(certificate.getTags());
+            }
+            GiftCertificate updatedCertificate = certificateRepository.update(id, initialCertificate);
+            if (updatedCertificate.getTags() != null){
+                updatedCertificate.setTags(addTagsIfNotExist(updatedCertificate.getTags(), updatedCertificate.getId()));
+            }
             return converter.convertEntityToDto(updatedCertificate);
         } catch (RepositoryException e) {
             throw new ServiceException("Unable to handle update request in GiftCertificateServiceImpl", e);
         } catch (ResourceNotFoundException e) {
             throw new ResourceNotFoundServiceException("Resource not found in GiftCertificateServiceImpl", e);
+        }
+    }
+
+    private void deleteOldTags(long certificateId, List<Tag> tags){
+        for (var tag : tags){
+            certificateRepository.deleteGiftCertificateTagConnection(certificateId, tag.getId());
         }
     }
 

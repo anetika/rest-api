@@ -22,16 +22,14 @@ public class TagServiceImpl implements TagService {
 
     public TagServiceImpl(TagDao repository) {
         this.repository = repository;
-        this.converter = TagConverter.getInstance();
+        this.converter = new TagConverter();
         this.validator = TagValidator.getInstance();
     }
 
     @Override
     @Transactional
     public TagDto add(TagDto item) throws ServiceException, ValidationException {
-        if (!validator.validateTag(item)){
-            throw new ValidationException("TagDto isn't valid!");
-        }
+        validator.validateTag(item);
         Tag tag = converter.convertDtoToEntity(item);
         try{
             try {

@@ -3,19 +3,19 @@ package com.epam.esm.converter;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
 
+@Component
 public class GiftCertificateConverter {
 
-    private static final GiftCertificateConverter instance = new GiftCertificateConverter();
+    private final TagConverter tagConverter;
 
-    @Autowired
-    private TagConverter tagConverter;
+    public GiftCertificateConverter(TagConverter tagConverter) {
+        this.tagConverter = tagConverter;
+    }
 
-    private GiftCertificateConverter(){}
-
-    public static GiftCertificateConverter getInstance() {return instance;}
 
     public GiftCertificate convertDtoToEntity(GiftCertificateDto certificateDto) {
         GiftCertificate certificate = new GiftCertificate();

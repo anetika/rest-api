@@ -27,7 +27,7 @@ public class TagController {
     @PostMapping
     public ResponseEntity<TagDto> add(@RequestBody TagDto dto) throws ServiceException, ValidationException {
         dto = service.add(dto);
-        return new ResponseEntity<>(dto, HttpStatus.OK);
+        return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
 
     @GetMapping(value = "/{id}")

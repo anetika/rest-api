@@ -31,6 +31,16 @@ public interface GiftCertificateDao extends CRDDao<GiftCertificate> {
      */
     void addGiftCertificateTagConnection(long certificateId, long tagId) throws RepositoryException;
 
+
+    /**
+     * Deletes connection between certificate and tag
+     *
+     * @param certificateId the certificate id
+     * @param tagId         the tag id
+     * @throws RepositoryException the repository exception
+     */
+    void deleteGiftCertificateTagConnection(long certificateId, long tagId) throws RepositoryException;
+
     /**
      * Gets all certificates that exist
      *

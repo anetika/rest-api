@@ -1,6 +1,7 @@
 package com.epam.esm.service;
 
 import com.epam.esm.converter.GiftCertificateConverter;
+import com.epam.esm.converter.TagConverter;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.exception.*;
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -28,8 +28,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ActiveProfiles("service")
 @ExtendWith(MockitoExtension.class)
 public class GiftCertificateServiceTest {
 
@@ -57,7 +57,7 @@ public class GiftCertificateServiceTest {
 
     @BeforeEach
     public void setUpDtos(){
-        GiftCertificateConverter converter = GiftCertificateConverter.getInstance();
+        GiftCertificateConverter converter = new GiftCertificateConverter(new TagConverter());
 
         GiftCertificateDto dto1 = new GiftCertificateDto();
         dto1.setId(1);
@@ -153,6 +153,7 @@ public class GiftCertificateServiceTest {
     @Test
     public void shouldUpdateCertificateWhenExists() throws ResourceNotFoundException, RepositoryException, ServiceException, ResourceNotFoundServiceException, ValidationException {
         when(repository.update(1, certificates.get(0))).thenReturn(certificates.get(1));
+        when(repository.getById(1)).thenReturn(certificates.get(0));
         GiftCertificateDto certificateDto = service.update(1, dtos.get(0));
         assertEquals(certificateDto, dtos.get(1));
     }

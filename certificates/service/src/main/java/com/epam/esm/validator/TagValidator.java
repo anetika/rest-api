@@ -1,6 +1,7 @@
 package com.epam.esm.validator;
 
 import com.epam.esm.dto.TagDto;
+import com.epam.esm.exception.ValidationException;
 import org.springframework.stereotype.Component;
 
 import java.util.regex.Matcher;
@@ -19,13 +20,15 @@ public class TagValidator {
         return instance;
     }
 
-    public boolean validateTag(TagDto tag){
-        return validateName(tag.getName());
+    public void validateTag(TagDto tag){
+        validateName(tag.getName());
     }
 
-    private boolean validateName(String name) {
+    private void validateName(String name) {
         Pattern pattern = Pattern.compile(TAG_NAME_REGEX);
         Matcher matcher = pattern.matcher(name);
-        return matcher.matches();
+        if (!matcher.matches()) {
+            throw new ValidationException("validation_error.name");
+        }
     }
 }

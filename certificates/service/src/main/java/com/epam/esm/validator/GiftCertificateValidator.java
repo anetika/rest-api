@@ -2,6 +2,7 @@ package com.epam.esm.validator;
 
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.TagDto;
+import com.epam.esm.exception.ValidationException;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -24,39 +25,55 @@ public class GiftCertificateValidator {
         return instance;
     }
 
-    public boolean validateGiftCertificate(GiftCertificateDto giftCertificateDto) {
-        return validateName(giftCertificateDto.getName())
-                && validateDescription(giftCertificateDto.getDescription())
-                && validatePrice(giftCertificateDto.getPrice())
-                && validateDuration(giftCertificateDto.getDuration())
-                && validateTags(giftCertificateDto.getTags());
+    public void validateUpdatedGiftCertificate(GiftCertificateDto giftCertificateDto) {
+        if (giftCertificateDto.getName() != null) {
+            validateName(giftCertificateDto.getName());
+        }
+        if (giftCertificateDto.getDescription() != null) {
+            validateDescription(giftCertificateDto.getDescription());
+        }
+        if (giftCertificateDto.getPrice() != null) {
+            validatePrice(giftCertificateDto.getPrice());
+        }
     }
 
-    private boolean validateName(String name) {
+    public void validateGiftCertificate(GiftCertificateDto giftCertificateDto) {
+        validateName(giftCertificateDto.getName());
+        validateDescription(giftCertificateDto.getDescription());
+        validatePrice(giftCertificateDto.getPrice());
+        validateDuration(giftCertificateDto.getDuration());
+        validateTags(giftCertificateDto.getTags());
+    }
+
+    private void validateName(String name) {
         Pattern pattern = Pattern.compile(CERTIFICATE_NAME_REGEX);
         Matcher matcher = pattern.matcher(name);
-        return matcher.matches();
+        if (!matcher.matches()) {
+            throw new ValidationException("validation_error.name");
+        }
     }
 
-    private boolean validateDescription(String description) {
+    private void validateDescription(String description) {
         Pattern pattern = Pattern.compile(CERTIFICATE_DESCRIPTION);
         Matcher matcher = pattern.matcher(description);
-        return matcher.matches();
+        if (!matcher.matches()) {
+            throw new ValidationException("validation_error.description");
+        }
     }
 
-    private boolean validatePrice(BigDecimal price) {
-        Pattern pattern = Pattern.compile(CERTIFICATE_NUMBER);
-        Matcher matcher = pattern.matcher(price.toString());
-        return matcher.matches();
+    private void validatePrice(BigDecimal price) {
+        if (price.compareTo(new BigDecimal("0")) <= 0) {
+            throw new ValidationException("validation_error.price");
+        }
     }
 
-    private boolean validateDuration(int duration) {
-        Pattern pattern = Pattern.compile(CERTIFICATE_NUMBER);
-        Matcher matcher = pattern.matcher(Integer.toString(duration));
-        return matcher.matches();
+    private void validateDuration(int duration) {
+        if (duration <= 0) {
+            throw new ValidationException("validation_error.duration");
+        }
     }
 
-    private boolean validateTags(List<TagDto> tags){
-        return tags.stream().allMatch(tagValidator::validateTag);
+    private void validateTags(List<TagDto> tags){
+        tags.forEach(tagValidator::validateTag);
     }
 }

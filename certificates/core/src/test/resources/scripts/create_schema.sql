@@ -1,5 +1,5 @@
 CREATE TABLE gift_certificate (
-                                    id int NOT NULL AUTO_INCREMENT,
+                                    id SERIAL,
                                     name varchar(45) NOT NULL,
                                     description varchar(200) NOT NULL,
                                     price decimal(10,0) NOT NULL,
