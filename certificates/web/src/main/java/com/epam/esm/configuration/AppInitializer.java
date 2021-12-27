@@ -16,7 +16,8 @@ public class AppInitializer implements WebApplicationInitializer {
         servletContext.addListener(new ContextLoaderListener(context));
         context.setServletContext(servletContext);
         servletContext.setInitParameter("spring.profiles.active", "prod");
-        ServletRegistration.Dynamic servlet = servletContext.addServlet("DispatcherServlet", new DispatcherServlet(context));
+        DispatcherServlet dispatcherServlet = new DispatcherServlet(context);
+        ServletRegistration.Dynamic servlet = servletContext.addServlet("DispatcherServlet", dispatcherServlet);
         servlet.addMapping("/");
         servlet.setLoadOnStartup(1);
     }

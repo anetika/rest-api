@@ -1,13 +1,9 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dto.Dto;
-import com.epam.esm.entity.Tag;
-import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ResourceNotFoundServiceException;
 import com.epam.esm.exception.ServiceException;
 import com.epam.esm.exception.ValidationException;
-
-import java.util.List;
 
 /**
  * The interface that contains functionality for certificates and tags.

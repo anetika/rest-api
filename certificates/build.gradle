@@ -15,10 +15,11 @@ allprojects {
         implementation group: 'org.springframework', name: 'spring-core', version: springVersion
         implementation group: 'org.springframework', name: 'spring-context', version: springVersion
         implementation group: 'org.springframework', name: 'spring-jdbc', version: springVersion
+        implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.3'
+        implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.13.1'
         testImplementation group: 'org.springframework', name: 'spring-test', version: springVersion
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-        implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.3'
         implementation 'org.projectlombok:lombok:1.18.20'
         annotationProcessor 'org.projectlombok:lombok:1.18.20'
     }
