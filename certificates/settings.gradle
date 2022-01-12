@@ -1,4 +1,0 @@
-rootProject.name = 'certificates'
-include 'service'
-include 'core'
-include 'web'
