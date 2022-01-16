@@ -56,10 +56,10 @@ public class GiftCertificateController {
     }
 
     @GetMapping("/certificates")
-    public ResponseEntity<Page<GiftCertificateDto>> getAll(
+    public ResponseEntity<List<GiftCertificateDto>> getAll(
             @RequestParam(value = "page", defaultValue = "0", required = false) int page,
             @RequestParam(value = "size", defaultValue = "5", required = false) int size) {
-        Page<GiftCertificateDto> resultDtos = service.getAll(PageRequest.of(page, size));
+        List<GiftCertificateDto> resultDtos = service.getAll(page, size);
         resultDtos.forEach(hateoasUtil::attacheCertificateLink);
         return new ResponseEntity<>(resultDtos, HttpStatus.OK);
     }
@@ -81,7 +81,7 @@ public class GiftCertificateController {
     }
 
     @PutMapping("/certificates/{id}")
-    public ResponseEntity<GiftCertificateDto> update(@PathVariable long id, @Valid @RequestBody GiftCertificateDto certificateDto) {
+    public ResponseEntity<GiftCertificateDto> update(@PathVariable long id, @RequestBody GiftCertificateDto certificateDto) {
         GiftCertificateDto resultDto = service.update(id, certificateDto);
         hateoasUtil.attacheCertificateLink(resultDto);
         return new ResponseEntity<>(resultDto, HttpStatus.OK);

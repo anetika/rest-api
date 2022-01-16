@@ -8,12 +8,10 @@ import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ServiceException;
 import com.epam.esm.service.TagService;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -28,8 +26,9 @@ public class TagServiceImpl implements TagService {
         this.tagDao = tagDao;
     }
 
-    @Transactional
+
     @Override
+    @Transactional
     public TagDto add(TagDto dto) {
         Tag tag = converter.convertDtoToEntity(dto);
         try {
@@ -44,6 +43,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    @Transactional
     public TagDto getById(long id) {
         try {
             Optional<Tag> optionalTag = tagDao.findById(id);
@@ -57,19 +57,21 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public Page<TagDto> getAll(Pageable pageable) {
+    @Transactional
+    public List<TagDto> getAll(int page, int size) {
         try {
-            Page<Tag> tags = tagDao.findAll(pageable);
+            List<Tag> tags = tagDao.findAll(page, size);
             if (tags.isEmpty()) {
                 throw new ResourceNotFoundException("Resource not found");
             }
-            return new PageImpl<>(tags.stream().map(converter::convertEntityToDto).collect(Collectors.toList()));
+            return tags.stream().map(converter::convertEntityToDto).collect(Collectors.toList());
         } catch (DataAccessException e) {
             throw new ServiceException("Unable to handle getAll request in TagServiceImpl", e);
         }
     }
 
     @Override
+    @Transactional
     public void deleteById(long id) {
         try {
             if (tagDao.findById(id).isPresent()) {
@@ -83,6 +85,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    @Transactional
     public void deleteAll() {
         try {
             tagDao.deleteAll();

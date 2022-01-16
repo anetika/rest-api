@@ -16,9 +16,6 @@ import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ServiceException;
 import com.epam.esm.service.UserService;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +41,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto add(UserDto userDto) {
         User user = converter.convertDtoToEntity(userDto);
         try{
@@ -54,6 +52,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto getById(long id) {
         try{
             Optional<User> userOptional = userDao.findById(id);
@@ -67,13 +66,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<UserDto> getAll(Pageable pageable) {
+    @Transactional
+    public List<UserDto> getAll(int page, int size) {
         try {
-            Page<User> users = userDao.findAll(pageable);
+            List<User> users = userDao.findAll(page, size);
             if (users.isEmpty()){
                 throw new ResourceNotFoundException("Resource not found");
             }
-            return new PageImpl<>(users.stream().map(converter::convertEntityToDto).collect(Collectors.toList()));
+            return users.stream().map(converter::convertEntityToDto).collect(Collectors.toList());
         } catch (DataAccessException e){
             throw new ServiceException("Unable to handle getAll request in UserServiceImpl", e);
         }
@@ -110,6 +110,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public TagDto getMostWidelyUsedTag() {
         try {
             long userId = userDao.getUserByHighestCostOfAllOrders();

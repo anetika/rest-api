@@ -1,9 +1,11 @@
 package com.epam.esm.dao;
 
 import com.epam.esm.entity.Order;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
-public interface OrderDao extends CrudRepository<Order, Long> {
+public interface OrderDao {
+    Optional<Order> findById(long id);
 }

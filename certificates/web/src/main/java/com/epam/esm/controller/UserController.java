@@ -5,13 +5,12 @@ import com.epam.esm.dto.TagDto;
 import com.epam.esm.dto.UserDto;
 import com.epam.esm.service.UserService;
 import com.epam.esm.util.HateoasUtil;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 public class UserController {
@@ -52,11 +51,11 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<Page<UserDto>> getAll(
+    public ResponseEntity<List<UserDto>> getAll(
             @RequestParam(value = "page", defaultValue = "0", required = false) int page,
             @RequestParam(value = "size", defaultValue = "5", required = false) int size
     ) {
-        Page<UserDto> resultDtos = service.getAll(PageRequest.of(page, size));
+        List<UserDto> resultDtos = service.getAll(page, size);
         resultDtos.forEach(hateoasUtil::attacheUserLink);
         return new ResponseEntity<>(resultDtos, HttpStatus.OK);
     }

@@ -4,6 +4,7 @@ import com.epam.esm.dao.GiftCertificateUtilDao;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -21,6 +22,7 @@ public class GiftCertificateUtilDaoImpl implements GiftCertificateUtilDao {
         this.entityManager = entityManager;
     }
 
+    @Transactional
     @Override
     public List<GiftCertificate> findGiftCertificatesByTags(List<Tag> tags) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();

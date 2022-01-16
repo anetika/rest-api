@@ -1,13 +1,13 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dto.TagDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 public interface TagService {
     TagDto add(TagDto dto);
     TagDto getById(long id);
-    Page<TagDto> getAll(Pageable pageable);
+    List<TagDto> getAll(int page, int size);
     void deleteById(long id);
     void deleteAll();
 }

@@ -15,8 +15,8 @@ import com.epam.esm.service.GiftCertificateService;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -73,13 +73,13 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     @Transactional
-    public Page<GiftCertificateDto> getAll(Pageable pageable) {
+    public List<GiftCertificateDto> getAll(int page, int size) {
         try {
-            Page<GiftCertificate> certificates = certificateDao.findAll(pageable);
+            List<GiftCertificate> certificates = certificateDao.findAll(page, size);
             if (certificates.isEmpty()) {
                 throw new ResourceNotFoundException("Resource not found");
             }
-            return new PageImpl<>(certificates.stream().map(converter::convertEntityToDto).collect(Collectors.toList()));
+            return certificates.stream().map(converter::convertEntityToDto).collect(Collectors.toList());
         } catch (DataAccessException e) {
             throw new ServiceException("Unable to handle getAll request in GiftCertificateServiceImpl", e);
         }
@@ -169,7 +169,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
                 }
             }
             initialCertificate.setId(id);
-            GiftCertificate updatedCertificate = certificateDao.save(initialCertificate);
+            GiftCertificate updatedCertificate = certificateDao.update(initialCertificate);
             return converter.convertEntityToDto(updatedCertificate);
         } catch (DataAccessException e) {
             throw new ServiceException("Unable to handle update request in GiftCertificateServiceImpl", e);
@@ -177,6 +177,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
+    @Transactional
     public GiftCertificateDto updateCertificateDuration(long id, int duration) {
         try {
             Optional<GiftCertificate> optionalCertificate = certificateDao.findById(id);
@@ -195,6 +196,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
+    @Transactional
     public GiftCertificateDto updateCertificatePrice(long id, BigDecimal price) {
         try {
             Optional<GiftCertificate> optionalCertificate = certificateDao.findById(id);
@@ -213,6 +215,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
+    @Transactional
     public Page<GiftCertificateDto> getGiftCertificateByTags(List<TagDto> tagDtos, Pageable pageable) {
         List<Tag> tags = tagDtos.stream().map(tagConverter::convertDtoToEntity).collect(Collectors.toList());
         try {
