@@ -8,9 +8,7 @@ import com.epam.esm.dto.OrderInfoDto;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.User;
 import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.ServiceException;
 import com.epam.esm.service.OrderService;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -32,50 +30,38 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Set<OrderDto> getOrdersByUserId(long id) {
-        try{
-            Optional<User> optionalUser = userDao.findById(id);
-            if (optionalUser.isPresent()) {
-                User user = optionalUser.get();
-                return user.getOrders().stream().map(converter::convertEntityToDto).collect(Collectors.toSet());
-            }
-            throw new ResourceNotFoundException("Resource not found");
-        } catch (DataAccessException e){
-            throw new ServiceException("Unable to handle getOrdersByCertificateId request in OrderServiceImpl", e);
+        Optional<User> optionalUser = userDao.findById(id);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            return user.getOrders().stream().map(converter::convertEntityToDto).collect(Collectors.toSet());
         }
+        throw new ResourceNotFoundException("Resource not found");
     }
 
     @Override
     public OrderInfoDto getOrderInfoByUserId(long userId, long orderId) {
-        try {
-            Optional<User> optionalUser = userDao.findById(userId);
-            if (optionalUser.isPresent()) {
-                User user = optionalUser.get();
-                Optional<Order> optionalOrder = user.getOrders().stream().filter(a -> a.getId() == orderId).findFirst();
-                if (optionalOrder.isPresent()) {
-                    Order order = optionalOrder.get();
-                    OrderInfoDto orderInfoDto = new OrderInfoDto();
-                    orderInfoDto.setOrderDate(order.getOrderDate());
-                    orderInfoDto.setPrice(order.getTotalPrice());
-                    return orderInfoDto;
-                }
+        Optional<User> optionalUser = userDao.findById(userId);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            Optional<Order> optionalOrder = user.getOrders().stream().filter(a -> a.getId() == orderId).findFirst();
+            if (optionalOrder.isPresent()) {
+                Order order = optionalOrder.get();
+                OrderInfoDto orderInfoDto = new OrderInfoDto();
+                orderInfoDto.setOrderDate(order.getOrderDate());
+                orderInfoDto.setPrice(order.getTotalPrice());
+                return orderInfoDto;
             }
-            throw new ResourceNotFoundException("Resource not found");
-        } catch (DataAccessException e) {
-            throw new ServiceException("Unable to handle getOrderInfoByUserId request in OrderServiceImpl", e);
         }
+        throw new ResourceNotFoundException("Resource not found");
     }
 
     @Override
     public OrderDto getOrderById(long id) {
-        try {
-            Optional<Order> optionalOrder = orderDao.findById(id);
-            if (optionalOrder.isPresent()) {
-                Order order = optionalOrder.get();
-                return converter.convertEntityToDto(order);
-            }
-            throw new ResourceNotFoundException("Resource not found");
-        } catch (DataAccessException e) {
-            throw new ServiceException("Unable to handle getOrderById request in OrderServiceImpl", e);
+        Optional<Order> optionalOrder = orderDao.findById(id);
+        if (optionalOrder.isPresent()) {
+            Order order = optionalOrder.get();
+            return converter.convertEntityToDto(order);
         }
+        throw new ResourceNotFoundException("Resource not found");
     }
 }

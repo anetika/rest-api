@@ -2,13 +2,19 @@ package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.Tag;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,7 +61,10 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
 
     @Override
     public List<GiftCertificate> findAll(int page, int size) {
-        return null;
+        Query query = entityManager.createQuery("SELECT certificate FROM GiftCertificate certificate");
+        query.setFirstResult((page - 1) * size);
+        query.setMaxResults(size);
+        return query.getResultList();
     }
 
     @Override
@@ -74,5 +83,19 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
     public GiftCertificate update(GiftCertificate certificate) {
         entityManager.persist(certificate);
         return certificate;
+    }
+
+    @Override
+    public List<GiftCertificate> findGiftCertificatesByTags(List<Tag> tags, int page, int size) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<GiftCertificate> criteriaQuery = criteriaBuilder.createQuery(GiftCertificate.class);
+
+        Root<GiftCertificate> root = criteriaQuery.from(GiftCertificate.class);
+        List<Predicate> predicates = new ArrayList<>();
+        for (var tag : tags) {
+            predicates.add(criteriaBuilder.isMember(tag, root.get("tags")));
+        }
+        criteriaQuery.where(predicates.toArray(new Predicate[0]));
+        return entityManager.createQuery(criteriaQuery).setFirstResult((page - 1) * size).setMaxResults(size).getResultList();
     }
 }

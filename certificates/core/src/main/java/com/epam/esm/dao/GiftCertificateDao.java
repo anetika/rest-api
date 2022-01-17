@@ -1,6 +1,7 @@
 package com.epam.esm.dao;
 
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.Tag;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -16,4 +17,5 @@ public interface GiftCertificateDao {
     void deleteById(long id);
     void deleteAll();
     GiftCertificate update(GiftCertificate certificate);
+    List<GiftCertificate> findGiftCertificatesByTags(List<Tag> tags, int page, int size);
 }

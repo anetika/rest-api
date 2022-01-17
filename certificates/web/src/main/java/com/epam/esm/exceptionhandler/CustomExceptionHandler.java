@@ -1,7 +1,6 @@
 package com.epam.esm.exceptionhandler;
 
 import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.ServiceException;
 import com.epam.esm.translator.Translator;
 import com.epam.esm.util.CharsetUtil;
 import org.springframework.http.HttpStatus;
@@ -21,15 +20,6 @@ public class CustomExceptionHandler {
     public CustomExceptionHandler(Translator translator, CharsetUtil charsetUtil) {
         this.translator = translator;
         this.charsetUtil = charsetUtil;
-    }
-
-    @ExceptionHandler(ServiceException.class)
-    public ResponseEntity<ExceptionMessage> handleServiceException(){
-        String message = translator.toLocale("error500_message");
-        ExceptionMessage mes = new ExceptionMessage(message, HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR.value());
-        ResponseEntity<ExceptionMessage> responseEntity = new ResponseEntity<>(mes, HttpStatus.INTERNAL_SERVER_ERROR);
-        charsetUtil.changeExceptionResponseCharset(responseEntity);
-        return responseEntity;
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -55,6 +45,15 @@ public class CustomExceptionHandler {
         String message = translator.toLocale("validation_exception_message");
         ExceptionMessage mes = new ExceptionMessage(String.format(message, Objects.requireNonNull(e.getFieldError()).getField()), HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.value());
         ResponseEntity<ExceptionMessage> responseEntity = new ResponseEntity<>(mes, HttpStatus.BAD_REQUEST);
+        charsetUtil.changeExceptionResponseCharset(responseEntity);
+        return responseEntity;
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ExceptionMessage> handleRuntimeException(){
+        String message = translator.toLocale("error500_message");
+        ExceptionMessage mes = new ExceptionMessage(message, HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR.value());
+        ResponseEntity<ExceptionMessage> responseEntity = new ResponseEntity<>(mes, HttpStatus.INTERNAL_SERVER_ERROR);
         charsetUtil.changeExceptionResponseCharset(responseEntity);
         return responseEntity;
     }
