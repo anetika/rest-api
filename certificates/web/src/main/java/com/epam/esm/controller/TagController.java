@@ -1,70 +1,67 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.configuration.Translator;
 import com.epam.esm.dto.TagDto;
-import com.epam.esm.exception.ResourceNotFoundServiceException;
-import com.epam.esm.exception.ServiceException;
-import com.epam.esm.exception.ValidationException;
 import com.epam.esm.service.TagService;
-import org.springframework.http.HttpHeaders;
+import com.epam.esm.translator.Translator;
+import com.epam.esm.util.CharsetUtil;
+import com.epam.esm.util.HateoasUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/tags")
 public class TagController {
     private final TagService service;
-
+    private final HateoasUtil hateoasUtil;
     private final Translator translator;
+    private final CharsetUtil charsetUtil;
 
-    public TagController(TagService service, Translator translator) {
+    public TagController(TagService service, HateoasUtil hateoasUtil, Translator translator, CharsetUtil charsetUtil) {
         this.service = service;
+        this.hateoasUtil = hateoasUtil;
         this.translator = translator;
+        this.charsetUtil = charsetUtil;
     }
 
-    @PostMapping
-    public ResponseEntity<TagDto> add(@RequestBody TagDto dto) throws ServiceException, ValidationException {
-        dto = service.add(dto);
-        return new ResponseEntity<>(dto, HttpStatus.OK);
+    @PostMapping("/tags")
+    public ResponseEntity<TagDto> add(@Valid  @RequestBody TagDto tagDto) {
+        TagDto resultDto = service.add(tagDto);
+        hateoasUtil.attacheTagLink(resultDto);
+        return new ResponseEntity<>(resultDto, HttpStatus.CREATED);
     }
 
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<TagDto> getTagById(@PathVariable("id") long id) throws ServiceException, ResourceNotFoundServiceException {
-        TagDto tagDto = service.getById(id);
-        return new ResponseEntity<>(tagDto, HttpStatus.OK);
+    @GetMapping("/tags/{id}")
+    public ResponseEntity<TagDto> getById(@PathVariable long id) {
+        TagDto resultDto = service.getById(id);
+        hateoasUtil.attacheTagLink(resultDto);
+        return new ResponseEntity<>(resultDto, HttpStatus.OK);
     }
 
-    @GetMapping
-    public ResponseEntity<List<TagDto>> getAllTags() throws ServiceException {
-        List<TagDto> tagDtoList = service.getAll();
-        if (tagDtoList.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(tagDtoList, HttpStatus.OK);
+    @GetMapping("/tags")
+    public ResponseEntity<List<TagDto>> getAll(
+            @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(value = "size", defaultValue = "5", required = false) int size) {
+        List<TagDto> resultDtos = service.getAll(page, size);
+        resultDtos.forEach(hateoasUtil::attacheTagLink);
+        return new ResponseEntity<>(resultDtos, HttpStatus.OK);
     }
 
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<String> delete(@PathVariable("id") long id) throws ServiceException, ResourceNotFoundServiceException {
-        service.delete(id);
-        String message = translator.toLocale("tag_delete");
-        ResponseEntity<String> responseEntity = new ResponseEntity<>(message, HttpStatus.OK);
-        changeResponseCharset(responseEntity);
+    @DeleteMapping("/tags/{id}")
+    public ResponseEntity<String> deleteById(@PathVariable long id) {
+        service.deleteById(id);
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(translator.toLocale("tag_delete"), HttpStatus.OK);
+        charsetUtil.changeResponseCharset(responseEntity);
         return responseEntity;
     }
 
-    @DeleteMapping
-    public ResponseEntity<String> deleteAll() throws ServiceException {
+    @DeleteMapping("/tags")
+    public ResponseEntity<String> deleteAll() {
         service.deleteAll();
-        String message = translator.toLocale("tags_delete");
-        ResponseEntity<String> responseEntity = new ResponseEntity<>(message, HttpStatus.OK);
-        changeResponseCharset(responseEntity);
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(translator.toLocale("tags_delete"), HttpStatus.OK);
+        charsetUtil.changeResponseCharset(responseEntity);
         return responseEntity;
-    }
-
-    private void changeResponseCharset(ResponseEntity<String> responseEntity){
-        HttpHeaders httpHeaders = HttpHeaders.writableHttpHeaders(responseEntity.getHeaders());
-        httpHeaders.add("Content-Type", "text/plain;charset=UTF-8");
     }
 }

@@ -1,87 +1,101 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.configuration.Translator;
 import com.epam.esm.dto.GiftCertificateDto;
-import com.epam.esm.exception.ResourceNotFoundServiceException;
-import com.epam.esm.exception.ServiceException;
-import com.epam.esm.exception.ValidationException;
+import com.epam.esm.dto.TagDto;
 import com.epam.esm.service.GiftCertificateService;
-import org.springframework.http.HttpHeaders;
+import com.epam.esm.translator.Translator;
+import com.epam.esm.util.CharsetUtil;
+import com.epam.esm.util.HateoasUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
+import javax.validation.Valid;
+import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 @RestController
-@RequestMapping("/certificates")
 public class GiftCertificateController {
+
     private final GiftCertificateService service;
-
     private final Translator translator;
+    private final HateoasUtil hateoasUtil;
+    private final CharsetUtil  charsetUtil;
 
-    public GiftCertificateController(GiftCertificateService service, Translator translator) {
+    public GiftCertificateController(GiftCertificateService service, Translator translator, HateoasUtil hateoasUtil, CharsetUtil charsetUtil) {
         this.service = service;
         this.translator = translator;
+        this.hateoasUtil = hateoasUtil;
+        this.charsetUtil = charsetUtil;
     }
 
-    @PostMapping
-    public ResponseEntity<GiftCertificateDto> add(@RequestBody GiftCertificateDto certificateDto) throws ServiceException, ValidationException {
-        certificateDto = service.add(certificateDto);
-        return new ResponseEntity<>(certificateDto, HttpStatus.OK);
+    @PostMapping("/certificates")
+    public ResponseEntity<GiftCertificateDto> add(@Valid @RequestBody GiftCertificateDto dto) {
+        GiftCertificateDto resultDto = service.add(dto);
+        hateoasUtil.attacheCertificateLink(resultDto);
+        return new ResponseEntity<>(resultDto, HttpStatus.CREATED);
     }
 
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<GiftCertificateDto> getGiftCertificateById(@PathVariable("id") long id) throws ServiceException, ResourceNotFoundServiceException {
-        GiftCertificateDto certificateDto = service.getById(id);
-        return new ResponseEntity<>(certificateDto, HttpStatus.OK);
+    @GetMapping("/certificates/{id}")
+    public ResponseEntity<GiftCertificateDto> getById(@PathVariable long id) {
+        GiftCertificateDto resultDto = service.getById(id);
+        hateoasUtil.attacheCertificateLink(resultDto);
+        return new ResponseEntity<>(resultDto, HttpStatus.OK);
     }
 
-    @GetMapping
-    public ResponseEntity<List<GiftCertificateDto>> getAllGiftCertificates(
-            @RequestParam(value = "tag", defaultValue = "", required = false) String tag,
-            @RequestParam(value = "search", defaultValue = "", required = false) String search,
-            @RequestParam(value = "sort", defaultValue = "", required = false) String sort
-    ) throws ServiceException {
-        Map<String, String> params = new HashMap<>();
-        params.put("tag", tag);
-        params.put("search", search);
-        params.put("sort", sort);
-        List<GiftCertificateDto> certificateDtoList = service.getAll(params);
-        if (certificateDtoList.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(certificateDtoList, HttpStatus.OK);
+    @GetMapping("/certificates/findByTags")
+    public ResponseEntity<List<GiftCertificateDto>> getByTags(
+            @Valid @RequestBody List<TagDto> dtos,
+            @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(value = "size", defaultValue = "5", required = false) int size) {
+        List<GiftCertificateDto> resultDto = service.getGiftCertificateByTags(dtos, page, size);
+        resultDto.forEach(hateoasUtil::attacheCertificateLink);
+        return new ResponseEntity<>(resultDto, HttpStatus.OK);
     }
 
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<String> delete(@PathVariable("id") long id) throws ServiceException, ResourceNotFoundServiceException {
-        service.delete(id);
-        String message = translator.toLocale("certificate_delete");
-        ResponseEntity<String> responseEntity = new ResponseEntity<>(message, HttpStatus.OK);
-        changeResponseCharset(responseEntity);
+    @GetMapping("/certificates")
+    public ResponseEntity<List<GiftCertificateDto>> getAll(
+            @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(value = "size", defaultValue = "5", required = false) int size) {
+        List<GiftCertificateDto> resultDtos = service.getAll(page, size);
+        resultDtos.forEach(hateoasUtil::attacheCertificateLink);
+        return new ResponseEntity<>(resultDtos, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/certificates/{id}")
+    public ResponseEntity<String> deleteById(@PathVariable long id) {
+        service.deleteById(id);
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(translator.toLocale("certificate_delete"), HttpStatus.OK);
+        charsetUtil.changeResponseCharset(responseEntity);
         return responseEntity;
     }
 
-    @DeleteMapping
-    public ResponseEntity<String> deleteAll() throws ServiceException {
+    @DeleteMapping("/certificates")
+    public ResponseEntity<String> deleteAll() {
         service.deleteAll();
-        String message = translator.toLocale("certificates_delete");
-        ResponseEntity<String> responseEntity = new ResponseEntity<>(message, HttpStatus.OK);
-        changeResponseCharset(responseEntity);
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(translator.toLocale("certificates_delete"), HttpStatus.OK);
+        charsetUtil.changeResponseCharset(responseEntity);
         return responseEntity;
     }
 
-    @PutMapping(value = "/{id}")
-    public ResponseEntity<GiftCertificateDto> update(@PathVariable("id") long id, @RequestBody GiftCertificateDto giftCertificateDto) throws ServiceException, ResourceNotFoundServiceException, ValidationException {
-        giftCertificateDto = service.update(id, giftCertificateDto);
-        return new ResponseEntity<>(giftCertificateDto, HttpStatus.OK);
+    @PutMapping("/certificates/{id}")
+    public ResponseEntity<GiftCertificateDto> update(@PathVariable long id, @RequestBody GiftCertificateDto certificateDto) {
+        GiftCertificateDto resultDto = service.update(id, certificateDto);
+        hateoasUtil.attacheCertificateLink(resultDto);
+        return new ResponseEntity<>(resultDto, HttpStatus.OK);
     }
 
-    private void changeResponseCharset(ResponseEntity<String> responseEntity){
-        HttpHeaders httpHeaders = HttpHeaders.writableHttpHeaders(responseEntity.getHeaders());
-        httpHeaders.add("Content-Type", "text/plain;charset=UTF-8");
+    @PutMapping("/certificates/{id}/updateDuration")
+    public ResponseEntity<GiftCertificateDto> updateDuration(@PathVariable long id, @RequestBody int duration) {
+        GiftCertificateDto resultDto = service.updateCertificateDuration(id, duration);
+        hateoasUtil.attacheCertificateLink(resultDto);
+        return new ResponseEntity<>(resultDto, HttpStatus.OK);
+    }
+
+    @PutMapping("/certificates/{id}/updatePrice")
+    public ResponseEntity<GiftCertificateDto> updatePrice(@PathVariable long id, @RequestBody BigDecimal price) {
+        GiftCertificateDto resultDto = service.updateCertificatePrice(id, price);
+        hateoasUtil.attacheCertificateLink(resultDto);
+        return new ResponseEntity<>(resultDto, HttpStatus.OK);
     }
 }

@@ -1,39 +1,17 @@
 package com.epam.esm.dao;
 
 import com.epam.esm.entity.Tag;
-import com.epam.esm.exception.RepositoryException;
-import com.epam.esm.exception.ResourceNotFoundException;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
-/**
- * The interface that contains functionality for TagRepository
- */
-public interface TagDao extends CRDDao<Tag> {
-    /**
-     * Gets tag by name.
-     *
-     * @param name the name of tag
-     * @return the tag
-     * @throws RepositoryException       the repository exception
-     * @throws ResourceNotFoundException the resource not found exception
-     */
-    Tag getByName(String name) throws RepositoryException, ResourceNotFoundException;
-
-    /**
-     * Gets all tags by certificate id.
-     *
-     * @param id the id of certificate
-     * @return all tags by certificate id
-     * @throws RepositoryException the repository exception
-     */
-    List<Tag> getAllTagsByCertificateId(long id) throws RepositoryException;
-
-    /**
-     * Gets all tags.
-     *
-     * @return all tags
-     * @throws RepositoryException the repository exception
-     */
-    List<Tag> getAll() throws RepositoryException;
+@Repository
+public interface TagDao {
+    Optional<Tag> findTagByName(String name);
+    Optional<Tag> findById(long id);
+    List<Tag> findAll(int page, int size);
+    Tag save(Tag tag);
+    void deleteById(long id);
+    void deleteAll();
 }

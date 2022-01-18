@@ -1,93 +1,74 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.converter.TagConverter;
+import com.epam.esm.dao.TagDao;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.Tag;
-import com.epam.esm.exception.*;
-import com.epam.esm.dao.TagDao;
+import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.TagService;
-import com.epam.esm.validator.TagValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class TagServiceImpl implements TagService {
 
-    private final TagDao repository;
     private final TagConverter converter;
-    private final TagValidator validator;
+    private final TagDao tagDao;
 
-    public TagServiceImpl(TagDao repository) {
-        this.repository = repository;
-        this.converter = TagConverter.getInstance();
-        this.validator = TagValidator.getInstance();
+    public TagServiceImpl(TagConverter converter, TagDao tagDao) {
+        this.converter = converter;
+        this.tagDao = tagDao;
+    }
+
+
+    @Override
+    @Transactional
+    public TagDto add(TagDto dto) {
+        Tag tag = converter.convertDtoToEntity(dto);
+        Optional<Tag> optionalTag = tagDao.findTagByName(tag.getName());
+        if (optionalTag.isEmpty()) {
+            return converter.convertEntityToDto(tagDao.save(tag));
+        }
+        return converter.convertEntityToDto(optionalTag.get());
     }
 
     @Override
     @Transactional
-    public TagDto add(TagDto item) throws ServiceException, ValidationException {
-        if (!validator.validateTag(item)){
-            throw new ValidationException("TagDto isn't valid!");
+    public TagDto getById(long id) {
+        Optional<Tag> optionalTag = tagDao.findById(id);
+        if (optionalTag.isPresent()) {
+            return converter.convertEntityToDto(optionalTag.get());
         }
-        Tag tag = converter.convertDtoToEntity(item);
-        try{
-            try {
-                Tag initialTag = repository.getByName(tag.getName());
-                return converter.convertEntityToDto(initialTag);
-            }catch (ResourceNotFoundException e) {
-                return converter.convertEntityToDto(repository.add(tag));
-            }
-        } catch (RepositoryException e){
-            throw new ServiceException("Unable to handle add request in TagServiceImpl", e);
-        }
+        throw new ResourceNotFoundException("Resource not found");
     }
 
     @Override
-    public TagDto getById(long id) throws ServiceException, ResourceNotFoundServiceException {
-        try {
-            return converter.convertEntityToDto(repository.getById(id));
-        } catch (ResourceNotFoundException e) {
-            throw new ResourceNotFoundServiceException("Resource not found in TagServiceImpl", e);
-        } catch (RepositoryException e) {
-            throw new ServiceException("Unable to handle getById request in TagServiceImpl", e);
+    @Transactional
+    public List<TagDto> getAll(int page, int size) {
+        List<Tag> tags = tagDao.findAll(page, size);
+        if (tags.isEmpty()) {
+            throw new ResourceNotFoundException("Resource not found");
         }
+        return tags.stream().map(converter::convertEntityToDto).collect(Collectors.toList());
     }
 
     @Override
-    public List<TagDto> getAll() throws ServiceException {
-        try {
-            return repository.getAll().stream().map(converter::convertEntityToDto).collect(Collectors.toList());
-        } catch (RepositoryException e) {
-            throw new ServiceException("Unable to handle getAll request in TagServiceImpl", e);
+    @Transactional
+    public void deleteById(long id) {
+        if (tagDao.findById(id).isPresent()) {
+            tagDao.deleteById(id);
+        } else {
+            throw new ResourceNotFoundException("Resource not found");
         }
     }
 
     @Override
     @Transactional
-    public void delete(long id) throws ServiceException, ResourceNotFoundServiceException {
-        try {
-            try{
-                repository.getById(id);
-                repository.delete(id);
-            } catch (ResourceNotFoundException e){
-                throw new ResourceNotFoundServiceException("Resource not found in TagServiceImpl", e);
-            }
-        } catch (RepositoryException e) {
-            throw new ServiceException("Unable to handle delete request in TagServiceImpl", e);
-        }
+    public void deleteAll() {
+        tagDao.deleteAll();
     }
-
-    @Override
-    public void deleteAll() throws ServiceException {
-        try {
-            repository.deleteAll();
-        } catch (RepositoryException e) {
-            throw new ServiceException("Unable to handle deleteAll request in TagServiceImpl", e);
-        }
-    }
-
-
 }

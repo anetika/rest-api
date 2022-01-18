@@ -1,35 +1,32 @@
 package com.epam.esm.service;
 
 import com.epam.esm.converter.GiftCertificateConverter;
-import com.epam.esm.dto.GiftCertificateDto;
-import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.exception.*;
+import com.epam.esm.converter.TagConverter;
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.dao.TagDao;
+import com.epam.esm.dto.GiftCertificateDto;
+import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.impl.GiftCertificateServiceImpl;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.ActiveProfiles;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
 
-import org.mockito.junit.jupiter.MockitoExtension;
-
-@ActiveProfiles("service")
 @ExtendWith(MockitoExtension.class)
 public class GiftCertificateServiceTest {
 
@@ -37,27 +34,21 @@ public class GiftCertificateServiceTest {
     private GiftCertificateServiceImpl service;
 
     @Mock
-    private GiftCertificateDao repository;
+    private GiftCertificateDao certificateDao;
 
     @Mock
-    private TagDao tagRepository;
+    private TagDao tagDao;
+
+    @Mock
+    private GiftCertificateConverter certificateConverter;
 
     private final List<GiftCertificateDto> dtos = new ArrayList<>();
 
     private final List<GiftCertificate> certificates = new ArrayList<>();
 
-    private static final Map<String, String> map = new HashMap<>();
-
-    @BeforeAll
-    public static void setUp(){
-        map.put("tag", "");
-        map.put("sort", "");
-        map.put("search", "");
-    }
-
     @BeforeEach
     public void setUpDtos(){
-        GiftCertificateConverter converter = GiftCertificateConverter.getInstance();
+        GiftCertificateConverter converter = new GiftCertificateConverter(new TagConverter());
 
         GiftCertificateDto dto1 = new GiftCertificateDto();
         dto1.setId(1);
@@ -67,7 +58,7 @@ public class GiftCertificateServiceTest {
         dto1.setDuration(10);
         dto1.setCreateDate(LocalDateTime.now());
         dto1.setLastUpdateDate(LocalDateTime.now());
-        dto1.setTags(new ArrayList<>());
+        dto1.setTags(new HashSet<>());
 
         GiftCertificateDto dto2 = new GiftCertificateDto();
         dto2.setId(2);
@@ -77,7 +68,7 @@ public class GiftCertificateServiceTest {
         dto2.setDuration(14);
         dto2.setCreateDate(LocalDateTime.now());
         dto2.setLastUpdateDate(LocalDateTime.now());
-        dto2.setTags(new ArrayList<>());
+        dto2.setTags(new HashSet<>());
 
         GiftCertificateDto dto3 = new GiftCertificateDto();
         dto3.setId(3);
@@ -87,7 +78,7 @@ public class GiftCertificateServiceTest {
         dto3.setDuration(100);
         dto3.setCreateDate(LocalDateTime.now());
         dto3.setLastUpdateDate(LocalDateTime.now());
-        dto3.setTags(new ArrayList<>());
+        dto3.setTags(new HashSet<>());
 
         dtos.add(dto1);
         dtos.add(dto2);
@@ -103,58 +94,97 @@ public class GiftCertificateServiceTest {
     }
 
     @Test
-    public void shouldAddCertificateWhenExists() throws RepositoryException, ServiceException, ValidationException {
-        when(repository.add(any())).thenReturn(certificates.get(0));
+    public void add_CertificateWithValidInfo_Success() {
+        when(certificateConverter.convertDtoToEntity(dtos.get(0))).thenReturn(certificates.get(0));
+        when(certificateDao.save(any())).thenReturn(certificates.get(0));
+        when(certificateConverter.convertEntityToDto(certificates.get(0))).thenReturn(dtos.get(0));
         GiftCertificateDto certificateDto = service.add(dtos.get(0));
         assertEquals(certificateDto, dtos.get(0));
     }
 
     @Test
-    public void shouldGetCertificateByIdWhenExists() throws ResourceNotFoundException, RepositoryException, ServiceException, ResourceNotFoundServiceException {
-        when(repository.getById(1)).thenReturn(certificates.get(0));
-        when(tagRepository.getAllTagsByCertificateId(any(Long.class))).thenReturn(new ArrayList<>());
+    public void getById_ValidId_Success() {
+        when(certificateDao.findById(1)).thenReturn(Optional.of(certificates.get(0)));
+        when(certificateConverter.convertEntityToDto(certificates.get(0))).thenReturn(dtos.get(0));
         GiftCertificateDto certificateDto = service.getById(1);
         assertEquals(certificateDto, dtos.get(0));
     }
 
     @Test
-    public void shouldGetAllCertificatesWhenExist() throws RepositoryException, ServiceException {
-        when(repository.getAll(any())).thenReturn(certificates);
-        when(tagRepository.getAllTagsByCertificateId(any(Long.class))).thenReturn(new ArrayList<>());
-        List<GiftCertificateDto> list = service.getAll(map);
-
+    public void getAll_Success() {
+        when(certificateDao.findAll(1, 3)).thenReturn(certificates);
+        when(certificateConverter.convertEntityToDto(certificates.get(0))).thenReturn(dtos.get(0));
+        when(certificateConverter.convertEntityToDto(certificates.get(1))).thenReturn(dtos.get(1));
+        when(certificateConverter.convertEntityToDto(certificates.get(2))).thenReturn(dtos.get(2));
+        List<GiftCertificateDto> list = service.getAll(1, 3);
         assertEquals(list, dtos);
     }
 
     @Test
-    public void shouldDeleteCertificateWhenExists() throws RepositoryException, ServiceException, ResourceNotFoundServiceException {
+    public void deleteById_CorrectId_Success() {
+        when(certificateDao.findById(1)).thenReturn(Optional.of(certificates.get(0)));
         doAnswer(invocation -> {
             dtos.remove(0);
             certificates.remove(0);
             return null;
-        }).when(repository).delete(1);
-        when(repository.getAll(any())).thenReturn(certificates);
-        when(tagRepository.getAllTagsByCertificateId(any(Long.class))).thenReturn(new ArrayList<>());
-        service.delete(1);
-        List<GiftCertificateDto> certificateDtoList = service.getAll(map);
+        }).when(certificateDao).deleteById(1);
+        service.deleteById(1);
+        when(certificateDao.findAll(1, 2)).thenReturn(certificates);
+        when(certificateConverter.convertEntityToDto(certificates.get(0))).thenReturn(dtos.get(0));
+        when(certificateConverter.convertEntityToDto(certificates.get(1))).thenReturn(dtos.get(1));
+        List<GiftCertificateDto> certificateDtoList = service.getAll(1, 2);
         assertEquals(certificateDtoList, dtos);
     }
 
     @Test
-    public void shouldDeleteAllWhenExist() throws RepositoryException, ServiceException {
+    public void deleteAll_Success() {
+        int page = 0;
+        int size = 3;
         doAnswer(invocation -> {
-            dtos.clear();
+            certificates.clear();
             return null;
-        }).when(repository).deleteAll();
+        }).when(tagDao).deleteAll();
         service.deleteAll();
-        assertTrue(dtos.isEmpty());
+        dtos.clear();
+        when(certificateDao.findAll(page, size)).thenReturn(certificates);
+        assertThrows(ResourceNotFoundException.class, () -> service.getAll(page, size));
     }
 
     @Test
-    public void shouldUpdateCertificateWhenExists() throws ResourceNotFoundException, RepositoryException, ServiceException, ResourceNotFoundServiceException, ValidationException {
-        when(repository.update(1, certificates.get(0))).thenReturn(certificates.get(1));
+    public void update_ValidCertificateInfo_Success() {
+        when(certificateConverter.convertDtoToEntity(dtos.get(0))).thenReturn(certificates.get(0));
+        when(certificateDao.update(certificates.get(0))).thenReturn(certificates.get(1));
+        when(certificateDao.findById(1)).thenReturn(Optional.of(certificates.get(0)));
+        when(certificateConverter.convertEntityToDto(certificates.get(1))).thenReturn(dtos.get(1));
         GiftCertificateDto certificateDto = service.update(1, dtos.get(0));
         assertEquals(certificateDto, dtos.get(1));
     }
 
+    @Test
+    public void updateDuration_ValidCertificateInfo_Success() {
+        int duration = 15;
+        when(certificateDao.findById(1)).thenReturn(Optional.of(certificates.get(0)));
+        doAnswer(invocation -> {
+            certificates.get(0).setDuration(duration);
+            return null;
+        }).when(certificateDao).updateCertificateDuration(any(Long.class), any(Integer.class), any(LocalDateTime.class));
+        dtos.get(0).setDuration(duration);
+        when(certificateConverter.convertEntityToDto(certificates.get(0))).thenReturn(dtos.get(0));
+        GiftCertificateDto resultDto = service.updateCertificateDuration(1, duration);
+        assertEquals(resultDto, dtos.get(0));
+    }
+
+    @Test
+    public void updatePrice_ValidCertificateInfo_Success() {
+        BigDecimal price = new BigDecimal(1000);
+        when(certificateDao.findById(1)).thenReturn(Optional.of(certificates.get(0)));
+        doAnswer(invocation -> {
+            certificates.get(0).setPrice(price);
+            return null;
+        }).when(certificateDao).updateCertificatePrice(any(Long.class), any(BigDecimal.class), any(LocalDateTime.class));
+        dtos.get(0).setPrice(price);
+        when(certificateConverter.convertEntityToDto(certificates.get(0))).thenReturn(dtos.get(0));
+        GiftCertificateDto resultDto = service.updateCertificatePrice(1, price);
+        assertEquals(resultDto, dtos.get(0));
+    }
 }

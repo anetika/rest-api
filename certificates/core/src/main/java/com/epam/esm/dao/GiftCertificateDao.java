@@ -1,42 +1,21 @@
 package com.epam.esm.dao;
 
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.exception.RepositoryException;
-import com.epam.esm.exception.ResourceNotFoundException;
+import com.epam.esm.entity.Tag;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
-/**
- * The interface that contains functionality for GiftCertificateRepository
- */
-public interface GiftCertificateDao extends CRDDao<GiftCertificate> {
-    /**
-     * Updates gift certificate.
-     *
-     * @param id                 the id of updatable certificate
-     * @param updatedCertificate the updated certificate
-     * @return the gift certificate
-     * @throws RepositoryException       the repository exception
-     * @throws ResourceNotFoundException the resource not found exception
-     */
-    GiftCertificate update(long id, GiftCertificate updatedCertificate) throws RepositoryException, ResourceNotFoundException;
-
-    /**
-     * Adds connection between certificate and tag.
-     *
-     * @param certificateId the certificate id
-     * @param tagId         the tag id
-     * @throws RepositoryException the repository exception
-     */
-    void addGiftCertificateTagConnection(long certificateId, long tagId) throws RepositoryException;
-
-    /**
-     * Gets all certificates that exist
-     *
-     * @param params the parameters of request
-     * @return the list of certificates
-     * @throws RepositoryException the repository exception
-     */
-    List<GiftCertificate> getAll(Map<String, String> params) throws RepositoryException;
+public interface GiftCertificateDao {
+    void updateCertificateDuration(long id, int duration, LocalDateTime date);
+    void updateCertificatePrice(long id, BigDecimal price, LocalDateTime date);
+    GiftCertificate save(GiftCertificate certificate);
+    Optional<GiftCertificate> findById(long id);
+    List<GiftCertificate> findAll(int page, int size);
+    void deleteById(long id);
+    void deleteAll();
+    GiftCertificate update(GiftCertificate certificate);
+    List<GiftCertificate> findGiftCertificatesByTags(List<Tag> tags, int page, int size);
 }

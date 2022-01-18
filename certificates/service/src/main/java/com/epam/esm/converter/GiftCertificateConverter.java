@@ -2,20 +2,18 @@ package com.epam.esm.converter;
 
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
 
+@Component
 public class GiftCertificateConverter {
+    private final TagConverter tagConverter;
 
-    private static final GiftCertificateConverter instance = new GiftCertificateConverter();
+    public GiftCertificateConverter(TagConverter tagConverter) {
+        this.tagConverter = tagConverter;
+    }
 
-    @Autowired
-    private TagConverter tagConverter;
-
-    private GiftCertificateConverter(){}
-
-    public static GiftCertificateConverter getInstance() {return instance;}
 
     public GiftCertificate convertDtoToEntity(GiftCertificateDto certificateDto) {
         GiftCertificate certificate = new GiftCertificate();
@@ -27,7 +25,7 @@ public class GiftCertificateConverter {
         certificate.setCreateDate(certificateDto.getCreateDate());
         certificate.setLastUpdateDate(certificateDto.getLastUpdateDate());
         if (certificateDto.getTags() != null){
-            certificate.setTags(certificateDto.getTags().stream().map(a -> tagConverter.convertDtoToEntity(a)).collect(Collectors.toList()));
+            certificate.setTags(certificateDto.getTags().stream().map(tagConverter::convertDtoToEntity).collect(Collectors.toSet()));
         }
         return certificate;
     }
@@ -42,7 +40,7 @@ public class GiftCertificateConverter {
         certificateDto.setCreateDate(certificate.getCreateDate());
         certificateDto.setLastUpdateDate(certificate.getLastUpdateDate());
         if (certificate.getTags() != null){
-            certificateDto.setTags(certificate.getTags().stream().map(a -> tagConverter.convertEntityToDto(a)).collect(Collectors.toList()));
+            certificateDto.setTags(certificate.getTags().stream().map(tagConverter::convertEntityToDto).collect(Collectors.toSet()));
         }
         return certificateDto;
     }
