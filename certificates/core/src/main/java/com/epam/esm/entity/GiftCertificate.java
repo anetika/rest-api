@@ -13,6 +13,7 @@ import java.util.Set;
 @NoArgsConstructor
 @EqualsAndHashCode
 @ToString
+@Builder
 @Entity
 @Table(name = "gift_certificates")
 public class GiftCertificate {

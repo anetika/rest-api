@@ -8,6 +8,7 @@ import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.impl.GiftCertificateServiceImpl;
+import com.epam.esm.util.PaginationUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,15 +18,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class GiftCertificateServiceTest {
@@ -42,9 +39,15 @@ public class GiftCertificateServiceTest {
     @Mock
     private GiftCertificateConverter certificateConverter;
 
+    @Mock
+    private PaginationUtil paginationUtil;
+
     private final List<GiftCertificateDto> dtos = new ArrayList<>();
 
     private final List<GiftCertificate> certificates = new ArrayList<>();
+
+    private final Map<String, String> params = new HashMap<>();
+
 
     @BeforeEach
     public void setUpDtos(){
@@ -91,6 +94,10 @@ public class GiftCertificateServiceTest {
         certificates.add(certificate1);
         certificates.add(certificate2);
         certificates.add(certificate3);
+
+        params.put("sort", "ASC");
+        params.put("tag", "");
+        params.put("search", "");
     }
 
     @Test
@@ -112,16 +119,18 @@ public class GiftCertificateServiceTest {
 
     @Test
     public void getAll_Success() {
-        when(certificateDao.findAll(1, 3)).thenReturn(certificates);
+        doNothing().when(paginationUtil).validatePaginationInfo(any(Integer.class), any(Integer.class));
+        when(certificateDao.findAll(1, 3, params)).thenReturn(certificates);
         when(certificateConverter.convertEntityToDto(certificates.get(0))).thenReturn(dtos.get(0));
         when(certificateConverter.convertEntityToDto(certificates.get(1))).thenReturn(dtos.get(1));
         when(certificateConverter.convertEntityToDto(certificates.get(2))).thenReturn(dtos.get(2));
-        List<GiftCertificateDto> list = service.getAll(1, 3);
+        List<GiftCertificateDto> list = service.getAll(1, 3, params);
         assertEquals(list, dtos);
     }
 
     @Test
     public void deleteById_CorrectId_Success() {
+        doNothing().when(paginationUtil).validatePaginationInfo(any(Integer.class), any(Integer.class));
         when(certificateDao.findById(1)).thenReturn(Optional.of(certificates.get(0)));
         doAnswer(invocation -> {
             dtos.remove(0);
@@ -129,10 +138,10 @@ public class GiftCertificateServiceTest {
             return null;
         }).when(certificateDao).deleteById(1);
         service.deleteById(1);
-        when(certificateDao.findAll(1, 2)).thenReturn(certificates);
+        when(certificateDao.findAll(1, 2, params)).thenReturn(certificates);
         when(certificateConverter.convertEntityToDto(certificates.get(0))).thenReturn(dtos.get(0));
         when(certificateConverter.convertEntityToDto(certificates.get(1))).thenReturn(dtos.get(1));
-        List<GiftCertificateDto> certificateDtoList = service.getAll(1, 2);
+        List<GiftCertificateDto> certificateDtoList = service.getAll(1, 2, params);
         assertEquals(certificateDtoList, dtos);
     }
 
@@ -140,14 +149,15 @@ public class GiftCertificateServiceTest {
     public void deleteAll_Success() {
         int page = 0;
         int size = 3;
+        doNothing().when(paginationUtil).validatePaginationInfo(any(Integer.class), any(Integer.class));
         doAnswer(invocation -> {
             certificates.clear();
             return null;
         }).when(tagDao).deleteAll();
         service.deleteAll();
         dtos.clear();
-        when(certificateDao.findAll(page, size)).thenReturn(certificates);
-        assertThrows(ResourceNotFoundException.class, () -> service.getAll(page, size));
+        when(certificateDao.findAll(page, size, params)).thenReturn(certificates);
+        assertThrows(ResourceNotFoundException.class, () -> service.getAll(page, size, params));
     }
 
     @Test
@@ -158,33 +168,5 @@ public class GiftCertificateServiceTest {
         when(certificateConverter.convertEntityToDto(certificates.get(1))).thenReturn(dtos.get(1));
         GiftCertificateDto certificateDto = service.update(1, dtos.get(0));
         assertEquals(certificateDto, dtos.get(1));
-    }
-
-    @Test
-    public void updateDuration_ValidCertificateInfo_Success() {
-        int duration = 15;
-        when(certificateDao.findById(1)).thenReturn(Optional.of(certificates.get(0)));
-        doAnswer(invocation -> {
-            certificates.get(0).setDuration(duration);
-            return null;
-        }).when(certificateDao).updateCertificateDuration(any(Long.class), any(Integer.class), any(LocalDateTime.class));
-        dtos.get(0).setDuration(duration);
-        when(certificateConverter.convertEntityToDto(certificates.get(0))).thenReturn(dtos.get(0));
-        GiftCertificateDto resultDto = service.updateCertificateDuration(1, duration);
-        assertEquals(resultDto, dtos.get(0));
-    }
-
-    @Test
-    public void updatePrice_ValidCertificateInfo_Success() {
-        BigDecimal price = new BigDecimal(1000);
-        when(certificateDao.findById(1)).thenReturn(Optional.of(certificates.get(0)));
-        doAnswer(invocation -> {
-            certificates.get(0).setPrice(price);
-            return null;
-        }).when(certificateDao).updateCertificatePrice(any(Long.class), any(BigDecimal.class), any(LocalDateTime.class));
-        dtos.get(0).setPrice(price);
-        when(certificateConverter.convertEntityToDto(certificates.get(0))).thenReturn(dtos.get(0));
-        GiftCertificateDto resultDto = service.updateCertificatePrice(1, price);
-        assertEquals(resultDto, dtos.get(0));
     }
 }

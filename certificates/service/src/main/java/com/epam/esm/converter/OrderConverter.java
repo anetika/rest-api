@@ -14,20 +14,20 @@ public class OrderConverter {
     }
 
     public Order convertDtoToEntity(OrderDto dto){
-        Order order = new Order();
-        order.setId(dto.getId());
-        order.setCertificate(certificateConverter.convertDtoToEntity(dto.getCertificateDto()));
-        order.setTotalPrice(dto.getTotalPrice());
-        order.setOrderDate(dto.getOrderDate());
-        return order;
+        return Order.builder()
+                .id(dto.getId())
+                .certificate(certificateConverter.convertDtoToEntity(dto.getCertificateDto()))
+                .totalPrice(dto.getTotalPrice())
+                .orderDate(dto.getOrderDate())
+                .build();
     }
 
     public OrderDto convertEntityToDto(Order order){
-        OrderDto dto = new OrderDto();
-        dto.setId(order.getId());
-        dto.setCertificateDto(certificateConverter.convertEntityToDto(order.getCertificate()));
-        dto.setOrderDate(order.getOrderDate());
-        dto.setTotalPrice(order.getTotalPrice());
-        return dto;
+        return OrderDto.builder()
+                .id(order.getId())
+                .certificateDto(certificateConverter.convertEntityToDto(order.getCertificate()))
+                .totalPrice(order.getTotalPrice())
+                .orderDate(order.getOrderDate())
+                .build();
     }
 }

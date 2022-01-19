@@ -9,6 +9,7 @@ import com.epam.esm.dao.UserDao;
 import com.epam.esm.dto.UserDto;
 import com.epam.esm.entity.User;
 import com.epam.esm.service.impl.UserServiceImpl;
+import com.epam.esm.util.PaginationUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +23,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,6 +37,9 @@ public class UserServiceTest {
 
     @Mock
     private UserConverter userConverter;
+
+    @Mock
+    private PaginationUtil paginationUtil;
 
     private final List<User> users = new ArrayList<>();
     private final List<UserDto> userDtos = new ArrayList<>();
@@ -83,6 +88,7 @@ public class UserServiceTest {
 
     @Test
     public void getAll_Success() {
+        doNothing().when(paginationUtil).validatePaginationInfo(any(Integer.class), any(Integer.class));
         when(userDao.findAll(1, 2)).thenReturn(users);
         when(userConverter.convertEntityToDto(users.get(0))).thenReturn(userDtos.get(0));
         when(userConverter.convertEntityToDto(users.get(1))).thenReturn(userDtos.get(1));

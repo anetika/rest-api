@@ -1,7 +1,6 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.dto.OrderDto;
-import com.epam.esm.dto.OrderInfoDto;
 import com.epam.esm.service.OrderService;
 import com.epam.esm.util.HateoasUtil;
 import org.springframework.http.HttpStatus;
@@ -37,7 +36,7 @@ public class OrderController {
     }
 
     @GetMapping("/users/{userId}/orders/{orderId}")
-    public ResponseEntity<OrderInfoDto> getOrderInfoById(@PathVariable long userId, @PathVariable long orderId) {
-        return new ResponseEntity<>(orderService.getOrderInfoByUserId(userId, orderId), HttpStatus.OK);
+    public ResponseEntity<OrderDto> getOrderById(@PathVariable long userId, @PathVariable long orderId) {
+        return new ResponseEntity<>(orderService.getOrderByUserId(userId, orderId), HttpStatus.OK);
     }
 }

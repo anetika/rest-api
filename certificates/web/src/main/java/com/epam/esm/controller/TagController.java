@@ -42,7 +42,7 @@ public class TagController {
 
     @GetMapping("/tags")
     public ResponseEntity<List<TagDto>> getAll(
-            @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(value = "page", defaultValue = "1", required = false) int page,
             @RequestParam(value = "size", defaultValue = "5", required = false) int size) {
         List<TagDto> resultDtos = service.getAll(page, size);
         resultDtos.forEach(hateoasUtil::attacheTagLink);

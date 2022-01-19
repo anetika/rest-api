@@ -6,6 +6,7 @@ import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.TagService;
+import com.epam.esm.util.PaginationUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,10 +19,12 @@ public class TagServiceImpl implements TagService {
 
     private final TagConverter converter;
     private final TagDao tagDao;
+    private final PaginationUtil paginationUtil;
 
-    public TagServiceImpl(TagConverter converter, TagDao tagDao) {
+    public TagServiceImpl(TagConverter converter, TagDao tagDao, PaginationUtil paginationUtil) {
         this.converter = converter;
         this.tagDao = tagDao;
+        this.paginationUtil = paginationUtil;
     }
 
 
@@ -37,7 +40,6 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    @Transactional
     public TagDto getById(long id) {
         Optional<Tag> optionalTag = tagDao.findById(id);
         if (optionalTag.isPresent()) {
@@ -47,8 +49,8 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    @Transactional
     public List<TagDto> getAll(int page, int size) {
+        paginationUtil.validatePaginationInfo(page, size);
         List<Tag> tags = tagDao.findAll(page, size);
         if (tags.isEmpty()) {
             throw new ResourceNotFoundException("Resource not found");
@@ -67,7 +69,6 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    @Transactional
     public void deleteAll() {
         tagDao.deleteAll();
     }

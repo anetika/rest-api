@@ -6,6 +6,7 @@ import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.impl.TagServiceImpl;
+import com.epam.esm.util.PaginationUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,8 +20,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class TagServiceTest {
@@ -29,6 +30,9 @@ public class TagServiceTest {
 
     @Mock
     private TagConverter tagConverter;
+
+    @Mock
+    private PaginationUtil paginationUtil;
 
     @InjectMocks
     private TagServiceImpl tagService;
@@ -84,6 +88,7 @@ public class TagServiceTest {
     public void getAll_Success() {
         int page = 0;
         int size = 3;
+        doNothing().when(paginationUtil).validatePaginationInfo(any(Integer.class), any(Integer.class));
         when(tagDao.findAll(page, size)).thenReturn(tags);
         when(tagConverter.convertEntityToDto(tags.get(0))).thenReturn(tagDtos.get(0));
         when(tagConverter.convertEntityToDto(tags.get(1))).thenReturn(tagDtos.get(1));
@@ -96,6 +101,7 @@ public class TagServiceTest {
     public void deleteById_CorrectId_Success() {
         int page = 0;
         int size = 3;
+        doNothing().when(paginationUtil).validatePaginationInfo(any(Integer.class), any(Integer.class));
         when(tagDao.findById(1L)).thenReturn(Optional.of(tags.get(0)));
         doAnswer(invocation -> {
             tags.remove(0);
@@ -114,6 +120,7 @@ public class TagServiceTest {
     public void deleteAll_Success() {
         int page = 0;
         int size = 3;
+        doNothing().when(paginationUtil).validatePaginationInfo(any(Integer.class), any(Integer.class));
         doAnswer(invocation -> {
             tags.clear();
             return null;

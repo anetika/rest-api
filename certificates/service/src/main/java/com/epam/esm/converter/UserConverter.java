@@ -16,22 +16,24 @@ public class UserConverter {
     }
 
     public UserDto convertEntityToDto(User user){
-        UserDto dto = new UserDto();
-        dto.setId(user.getId());
-        dto.setFirstName(user.getFirstName());
-        dto.setLastName(user.getLastName());
-        dto.setEmail(user.getEmail());
-        dto.setOrderDtoList(user.getOrders() == null ? new ArrayList<>() : user.getOrders().stream().map(orderConverter::convertEntityToDto).collect(Collectors.toList()));
-        return dto;
+        return UserDto.builder()
+                .id(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .orderDtoList(user.getOrders() == null ? new ArrayList<>() : user.getOrders()
+                        .stream().map(orderConverter::convertEntityToDto).collect(Collectors.toList()))
+                .build();
     }
 
     public User convertDtoToEntity(UserDto dto){
-        User user = new User();
-        user.setId(dto.getId());
-        user.setFirstName(dto.getFirstName());
-        user.setLastName(dto.getLastName());
-        user.setEmail(dto.getEmail());
-        user.setOrders(dto.getOrderDtoList() == null ? new ArrayList<>() : dto.getOrderDtoList().stream().map(orderConverter::convertDtoToEntity).collect(Collectors.toList()));
-        return user;
+        return User.builder()
+                .id(dto.getId())
+                .firstName(dto.getFirstName())
+                .lastName(dto.getLastName())
+                .email(dto.getEmail())
+                .orders(dto.getOrderDtoList() == null ? new ArrayList<>() : dto.getOrderDtoList()
+                        .stream().map(orderConverter::convertDtoToEntity).collect(Collectors.toList()))
+                .build();
     }
 }

@@ -6,17 +6,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class TagConverter {
-    public Tag convertDtoToEntity(TagDto dto){
-        Tag tag = new Tag();
-        tag.setId(dto.getId());
-        tag.setName(dto.getName());
-        return tag;
+    public Tag convertDtoToEntity(TagDto dto) {
+        return Tag.builder().id(dto.getId()).name(dto.getName()).build();
     }
 
-    public TagDto convertEntityToDto(Tag tag){
-        TagDto dto = new TagDto();
-        dto.setId(tag.getId());
-        dto.setName(tag.getName());
-        return dto;
+    public TagDto convertEntityToDto(Tag tag) {
+        return TagDto.builder().id(tag.getId()).name(tag.getName()).build();
     }
 }
