@@ -7,6 +7,9 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+/**
+ * The converter for {@link User} and {@link UserDto}.
+ */
 @Component
 public class UserConverter {
     private final OrderConverter orderConverter;
@@ -15,6 +18,12 @@ public class UserConverter {
         this.orderConverter = orderConverter;
     }
 
+    /**
+     * Converts entity to user dto.
+     *
+     * @param user the user
+     * @return the user dto
+     */
     public UserDto convertEntityToDto(User user){
         return UserDto.builder()
                 .id(user.getId())
@@ -26,6 +35,12 @@ public class UserConverter {
                 .build();
     }
 
+    /**
+     * Converts user dto to entity.
+     *
+     * @param dto the user dto
+     * @return the user
+     */
     public User convertDtoToEntity(UserDto dto){
         return User.builder()
                 .id(dto.getId())
