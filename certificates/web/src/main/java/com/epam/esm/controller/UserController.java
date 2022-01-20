@@ -23,7 +23,7 @@ public class UserController {
         this.hateoasUtil = hateoasUtil;
     }
 
-    @PostMapping("/users/{userId}/buyCertificate/{certificateId}")
+    @PostMapping("/users/{userId}/certificates/{certificateId}")
     public ResponseEntity<OrderDto> buyCertificate(@PathVariable long certificateId, @PathVariable long userId) {
         OrderDto dto = service.buyCertificate(userId, certificateId);
         return new ResponseEntity<>(dto, HttpStatus.OK);
@@ -43,7 +43,7 @@ public class UserController {
         return new ResponseEntity<>(resultDto, HttpStatus.OK);
     }
 
-    @GetMapping("/users/mostWidelyUsedTag")
+    @GetMapping("/users/tags")
     public ResponseEntity<TagDto> getMostWidelyUsedTag() {
         TagDto resultDto = service.getMostWidelyUsedTag();
         hateoasUtil.attacheTagLink(resultDto);
@@ -52,7 +52,7 @@ public class UserController {
 
     @GetMapping("/users")
     public ResponseEntity<List<UserDto>> getAll(
-            @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(value = "page", defaultValue = "1", required = false) int page,
             @RequestParam(value = "size", defaultValue = "5", required = false) int size
     ) {
         List<UserDto> resultDtos = service.getAll(page, size);

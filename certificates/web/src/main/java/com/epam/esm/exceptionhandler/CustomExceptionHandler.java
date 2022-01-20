@@ -1,5 +1,6 @@
 package com.epam.esm.exceptionhandler;
 
+import com.epam.esm.exception.PaginationException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.translator.Translator;
 import com.epam.esm.util.CharsetUtil;
@@ -49,6 +50,24 @@ public class CustomExceptionHandler {
         return responseEntity;
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ExceptionMessage> handleIllegalArgumentException(){
+        String message = translator.toLocale("argument_exception_message");
+        ExceptionMessage mes = new ExceptionMessage(message, HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.value());
+        ResponseEntity<ExceptionMessage> responseEntity = new ResponseEntity<>(mes, HttpStatus.BAD_REQUEST);
+        charsetUtil.changeExceptionResponseCharset(responseEntity);
+        return responseEntity;
+    }
+
+    @ExceptionHandler(PaginationException.class)
+    public ResponseEntity<ExceptionMessage> handlePaginationException() {
+        String message = translator.toLocale("pagination_exception_message");
+        ExceptionMessage mes = new ExceptionMessage(message, HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.value());
+        ResponseEntity<ExceptionMessage> responseEntity = new ResponseEntity<>(mes, HttpStatus.BAD_REQUEST);
+        charsetUtil.changeExceptionResponseCharset(responseEntity);
+        return responseEntity;
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ExceptionMessage> handleRuntimeException(){
         String message = translator.toLocale("error500_message");
@@ -57,4 +76,6 @@ public class CustomExceptionHandler {
         charsetUtil.changeExceptionResponseCharset(responseEntity);
         return responseEntity;
     }
+
+
 }

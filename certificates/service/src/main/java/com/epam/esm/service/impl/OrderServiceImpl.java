@@ -4,7 +4,6 @@ import com.epam.esm.converter.OrderConverter;
 import com.epam.esm.dao.OrderDao;
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.dto.OrderDto;
-import com.epam.esm.dto.OrderInfoDto;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.User;
 import com.epam.esm.exception.ResourceNotFoundException;
@@ -39,17 +38,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderInfoDto getOrderInfoByUserId(long userId, long orderId) {
+    public OrderDto getOrderByUserId(long userId, long orderId) {
         Optional<User> optionalUser = userDao.findById(userId);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             Optional<Order> optionalOrder = user.getOrders().stream().filter(a -> a.getId() == orderId).findFirst();
             if (optionalOrder.isPresent()) {
                 Order order = optionalOrder.get();
-                OrderInfoDto orderInfoDto = new OrderInfoDto();
-                orderInfoDto.setOrderDate(order.getOrderDate());
-                orderInfoDto.setPrice(order.getTotalPrice());
-                return orderInfoDto;
+                return converter.convertEntityToDto(order);
             }
         }
         throw new ResourceNotFoundException("Resource not found");

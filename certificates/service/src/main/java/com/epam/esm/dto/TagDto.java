@@ -11,6 +11,7 @@ import javax.validation.constraints.Pattern;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
+@Builder
 @ToString
 public class TagDto extends RepresentationModel<TagDto> {
     private long id;

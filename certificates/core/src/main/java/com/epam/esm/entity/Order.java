@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @EqualsAndHashCode
 @ToString
+@Builder
 @Entity
 @Table(name = "orders")
 public class Order {

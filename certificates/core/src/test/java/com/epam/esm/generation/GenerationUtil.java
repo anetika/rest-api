@@ -26,7 +26,7 @@ public class GenerationUtil {
 
     private final Random random = new Random();
 
-    @Test
+    //@Test
     public void generateTags(){
         for (int i = 0; i < 1000; i++) {
             Tag tag = new Tag();
@@ -35,7 +35,7 @@ public class GenerationUtil {
         }
     }
 
-    @Test
+    //@Test
     public void generateCertificates(){
         for (int i = 0; i < 10000; i++){
             GiftCertificate giftCertificate = new GiftCertificate();
@@ -54,7 +54,7 @@ public class GenerationUtil {
         }
     }
 
-    @Test
+    //@Test
     public void generateUsers() {
         for (int i = 0; i < 1000; i++) {
             User user = new User();

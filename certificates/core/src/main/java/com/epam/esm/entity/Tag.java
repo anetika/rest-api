@@ -10,6 +10,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @EqualsAndHashCode
 @ToString
+@Builder
 @Entity
 @Table(name = "tags")
 public class Tag {

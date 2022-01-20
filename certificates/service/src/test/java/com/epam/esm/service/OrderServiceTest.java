@@ -8,7 +8,6 @@ import com.epam.esm.dao.OrderDao;
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.OrderDto;
-import com.epam.esm.dto.OrderInfoDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.User;
@@ -109,7 +108,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void getOrderInfoByUserId_Success() {
+    public void getOrderByUserId_Success() {
         User user = new User();
         user.setId(1);
         user.setFirstName("Ann");
@@ -117,11 +116,9 @@ public class OrderServiceTest {
         user.setEmail("anna.ksenevich@mail.ru");
         user.setOrders(orders);
         when(userDao.findById(anyLong())).thenReturn(Optional.of(user));
-        OrderInfoDto dto = new OrderInfoDto();
-        dto.setPrice(orders.get(0).getTotalPrice());
-        dto.setOrderDate(orders.get(0).getOrderDate());
-        OrderInfoDto resultDto = orderService.getOrderInfoByUserId(1, 1);
-        assertEquals(resultDto, dto);
+        when(orderConverter.convertEntityToDto(orders.get(0))).thenReturn(orderDtos.get(0));
+        OrderDto resultDto = orderService.getOrderByUserId(1, 1);
+        assertEquals(resultDto, orderDtos.get(0));
     }
 
     @Test

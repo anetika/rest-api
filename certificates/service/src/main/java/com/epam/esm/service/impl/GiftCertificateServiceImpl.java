@@ -10,15 +10,13 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.GiftCertificateService;
+import com.epam.esm.util.PaginationUtil;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,12 +25,14 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     private final GiftCertificateConverter converter;
     private final GiftCertificateDao certificateDao;
     private final TagDao tagDao;
+    private final PaginationUtil paginationUtil;
 
-    public GiftCertificateServiceImpl(TagConverter tagConverter, GiftCertificateConverter converter, GiftCertificateDao certificateDao, TagDao tagDao) {
+    public GiftCertificateServiceImpl(TagConverter tagConverter, GiftCertificateConverter converter, GiftCertificateDao certificateDao, TagDao tagDao, PaginationUtil paginationUtil) {
         this.tagConverter = tagConverter;
         this.converter = converter;
         this.certificateDao = certificateDao;
         this.tagDao = tagDao;
+        this.paginationUtil = paginationUtil;
     }
 
     @Override
@@ -56,7 +56,6 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    @Transactional
     public GiftCertificateDto getById(long id) {
         Optional<GiftCertificate> optionalGiftCertificate = certificateDao.findById(id);
         if (optionalGiftCertificate.isPresent()){
@@ -67,8 +66,9 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     @Transactional
-    public List<GiftCertificateDto> getAll(int page, int size) {
-        List<GiftCertificate> certificates = certificateDao.findAll(page, size);
+    public List<GiftCertificateDto> getAll(int page, int size, Map<String, String> params) {
+        paginationUtil.validatePaginationInfo(page, size);
+        List<GiftCertificate> certificates = certificateDao.findAll(page, size, params);
         if (certificates.isEmpty()) {
             throw new ResourceNotFoundException("Resource not found");
         }
@@ -86,7 +86,6 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    @Transactional
     public void deleteAll() {
         tagDao.deleteAll();
     }
@@ -155,37 +154,8 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     @Transactional
-    public GiftCertificateDto updateCertificateDuration(long id, int duration) {
-        Optional<GiftCertificate> optionalCertificate = certificateDao.findById(id);
-        if (optionalCertificate.isPresent()) {
-            LocalDateTime dateTime = LocalDateTime.now();
-            certificateDao.updateCertificateDuration(id, duration, dateTime);
-            GiftCertificate certificate = optionalCertificate.get();
-            certificate.setDuration(duration);
-            certificate.setLastUpdateDate(dateTime);
-            return converter.convertEntityToDto(certificate);
-        }
-        throw new ResourceNotFoundException("Resource not found");
-    }
-
-    @Override
-    @Transactional
-    public GiftCertificateDto updateCertificatePrice(long id, BigDecimal price) {
-        Optional<GiftCertificate> optionalCertificate = certificateDao.findById(id);
-        if (optionalCertificate.isPresent()) {
-            LocalDateTime dateTime = LocalDateTime.now();
-            certificateDao.updateCertificatePrice(id, price, dateTime);
-            GiftCertificate certificate = optionalCertificate.get();
-            certificate.setPrice(price);
-            certificate.setLastUpdateDate(dateTime);
-            return converter.convertEntityToDto(certificate);
-        }
-        throw new ResourceNotFoundException("Resource not found");
-    }
-
-    @Override
-    @Transactional
     public List<GiftCertificateDto> getGiftCertificateByTags(List<TagDto> tagDtos, int page, int size) {
+        paginationUtil.validatePaginationInfo(page, size);
         List<Tag> tags = tagDtos.stream().map(tagConverter::convertDtoToEntity).collect(Collectors.toList());
         for (var tag : tags) {
             Optional<Tag> optionalTag = tagDao.findTagByName(tag.getName());

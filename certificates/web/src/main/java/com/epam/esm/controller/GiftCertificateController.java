@@ -11,8 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class GiftCertificateController {
@@ -43,10 +44,10 @@ public class GiftCertificateController {
         return new ResponseEntity<>(resultDto, HttpStatus.OK);
     }
 
-    @GetMapping("/certificates/findByTags")
+    @GetMapping("/certificates/tags")
     public ResponseEntity<List<GiftCertificateDto>> getByTags(
             @Valid @RequestBody List<TagDto> dtos,
-            @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(value = "page", defaultValue = "1", required = false) int page,
             @RequestParam(value = "size", defaultValue = "5", required = false) int size) {
         List<GiftCertificateDto> resultDto = service.getGiftCertificateByTags(dtos, page, size);
         resultDto.forEach(hateoasUtil::attacheCertificateLink);
@@ -55,9 +56,16 @@ public class GiftCertificateController {
 
     @GetMapping("/certificates")
     public ResponseEntity<List<GiftCertificateDto>> getAll(
-            @RequestParam(value = "page", defaultValue = "0", required = false) int page,
-            @RequestParam(value = "size", defaultValue = "5", required = false) int size) {
-        List<GiftCertificateDto> resultDtos = service.getAll(page, size);
+            @RequestParam(value = "page", defaultValue = "1", required = false) int page,
+            @RequestParam(value = "size", defaultValue = "5", required = false) int size,
+            @RequestParam(value = "sort", defaultValue = "ASC", required = false) String sort,
+            @RequestParam(value = "search", defaultValue = "", required = false) String namePart,
+            @RequestParam(value = "tag", defaultValue = "", required = false) String tag) {
+        Map<String, String> params = new HashMap<>();
+        params.put("sort", sort.toUpperCase());
+        params.put("search", namePart);
+        params.put("tag", tag);
+        List<GiftCertificateDto> resultDtos = service.getAll(page, size, params);
         resultDtos.forEach(hateoasUtil::attacheCertificateLink);
         return new ResponseEntity<>(resultDtos, HttpStatus.OK);
     }
@@ -78,23 +86,9 @@ public class GiftCertificateController {
         return responseEntity;
     }
 
-    @PutMapping("/certificates/{id}")
+    @PatchMapping("/certificates/{id}")
     public ResponseEntity<GiftCertificateDto> update(@PathVariable long id, @RequestBody GiftCertificateDto certificateDto) {
         GiftCertificateDto resultDto = service.update(id, certificateDto);
-        hateoasUtil.attacheCertificateLink(resultDto);
-        return new ResponseEntity<>(resultDto, HttpStatus.OK);
-    }
-
-    @PutMapping("/certificates/{id}/updateDuration")
-    public ResponseEntity<GiftCertificateDto> updateDuration(@PathVariable long id, @RequestBody int duration) {
-        GiftCertificateDto resultDto = service.updateCertificateDuration(id, duration);
-        hateoasUtil.attacheCertificateLink(resultDto);
-        return new ResponseEntity<>(resultDto, HttpStatus.OK);
-    }
-
-    @PutMapping("/certificates/{id}/updatePrice")
-    public ResponseEntity<GiftCertificateDto> updatePrice(@PathVariable long id, @RequestBody BigDecimal price) {
-        GiftCertificateDto resultDto = service.updateCertificatePrice(id, price);
         hateoasUtil.attacheCertificateLink(resultDto);
         return new ResponseEntity<>(resultDto, HttpStatus.OK);
     }

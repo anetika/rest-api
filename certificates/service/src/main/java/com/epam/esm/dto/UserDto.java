@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
+@Builder
 @ToString
 public class UserDto extends RepresentationModel<UserDto> {
     private long id;

@@ -2,17 +2,67 @@ package com.epam.esm.service;
 
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.TagDto;
-import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * The interface that contains functionality for GiftCertificateService.
+ */
 public interface GiftCertificateService {
+    /**
+     * Adds a certificate dto.
+     *
+     * @param certificateDto the certificate dto
+     * @return the certificate dto
+     */
     GiftCertificateDto add(GiftCertificateDto certificateDto);
+
+    /**
+     * Gets a certificate by id.
+     *
+     * @param id the id of the certificate dto
+     * @return the certificate dto
+     */
     GiftCertificateDto getById(long id);
-    List<GiftCertificateDto> getAll(int page, int size);
+
+    /**
+     * Gets all certificate dtos.
+     *
+     * @param page   the page
+     * @param size   the size
+     * @param params the params
+     * @return the list of all certificate dtos
+     */
+    List<GiftCertificateDto> getAll(int page, int size, Map<String, String> params);
+
+    /**
+     * Deletes a certificate dto by id.
+     *
+     * @param id the id of the certificate dto
+     */
     void deleteById(long id);
+
+    /**
+     * Deletes all certificate dtos.
+     */
     void deleteAll();
+
+    /**
+     * Updates a certificate dto.
+     *
+     * @param id             the id of the certificate dto
+     * @param certificateDto the certificate dto
+     * @return the gift certificate dto
+     */
     GiftCertificateDto update(long id, GiftCertificateDto certificateDto);
-    GiftCertificateDto updateCertificateDuration(long id, int duration);
-    GiftCertificateDto updateCertificatePrice(long id, BigDecimal price);
+
+    /**
+     * Gets a certificate dto by tags.
+     *
+     * @param tagDtos the tag dtos
+     * @param page    the page
+     * @param size    the size
+     * @return the certificate dto
+     */
     List<GiftCertificateDto> getGiftCertificateByTags(List<TagDto> tagDtos, int page, int size);
 }

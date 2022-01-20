@@ -14,6 +14,7 @@ import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.UserService;
+import com.epam.esm.util.PaginationUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,13 +30,15 @@ public class UserServiceImpl implements UserService {
     private final UserConverter converter;
     private final OrderConverter orderConverter;
     private final TagConverter tagConverter;
+    private final PaginationUtil paginationUtil;
 
-    public UserServiceImpl(UserDao userDao, GiftCertificateDao certificateDao, UserConverter converter, OrderConverter orderConverter, TagConverter tagConverter) {
+    public UserServiceImpl(UserDao userDao, GiftCertificateDao certificateDao, UserConverter converter, OrderConverter orderConverter, TagConverter tagConverter, PaginationUtil paginationUtil) {
         this.userDao = userDao;
         this.certificateDao = certificateDao;
         this.converter = converter;
         this.orderConverter = orderConverter;
         this.tagConverter = tagConverter;
+        this.paginationUtil = paginationUtil;
     }
 
     @Override
@@ -46,7 +49,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public UserDto getById(long id) {
         Optional<User> userOptional = userDao.findById(id);
         if (userOptional.isPresent()){
@@ -56,8 +58,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public List<UserDto> getAll(int page, int size) {
+        paginationUtil.validatePaginationInfo(page, size);
         List<User> users = userDao.findAll(page, size);
         if (users.isEmpty()){
             throw new ResourceNotFoundException("Resource not found");

@@ -1,6 +1,7 @@
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.GiftCertificateDao;
+import com.epam.esm.dao.TagDao;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import org.springframework.stereotype.Repository;
@@ -12,10 +13,9 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -24,28 +24,11 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
     @PersistenceContext
     private final EntityManager entityManager;
 
-    public GiftCertificateDaoImpl(EntityManager entityManager) {
+    private final TagDao tagDao;
+
+    public GiftCertificateDaoImpl(EntityManager entityManager, TagDao tagDao) {
         this.entityManager = entityManager;
-    }
-
-    @Override
-    public void updateCertificateDuration(long id, int duration, LocalDateTime date) {
-        Query query = entityManager.createQuery("UPDATE GiftCertificate certificate SET certificate.duration = :duration, certificate.lastUpdateDate = :date " +
-                "WHERE certificate.id = :id");
-        query.setParameter("duration", duration);
-        query.setParameter("date", date);
-        query.setParameter("id", id);
-        query.executeUpdate();
-    }
-
-    @Override
-    public void updateCertificatePrice(long id, BigDecimal price, LocalDateTime date) {
-        Query query = entityManager.createQuery("UPDATE GiftCertificate certificate SET certificate.price = :price, certificate.lastUpdateDate = :date " +
-                "WHERE certificate.id = :id");
-        query.setParameter("price", price);
-        query.setParameter("date", date);
-        query.setParameter("id", id);
-        query.executeUpdate();
+        this.tagDao = tagDao;
     }
 
     @Override
@@ -60,8 +43,9 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
     }
 
     @Override
-    public List<GiftCertificate> findAll(int page, int size) {
-        Query query = entityManager.createQuery("SELECT certificate FROM GiftCertificate certificate");
+    public List<GiftCertificate> findAll(int page, int size, Map<String, String> params) {
+        CriteriaQuery<GiftCertificate> criteriaQuery = createGetAllQuery(params);
+        Query query = entityManager.createQuery(criteriaQuery);
         query.setFirstResult((page - 1) * size);
         query.setMaxResults(size);
         return query.getResultList();
@@ -97,5 +81,35 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
         }
         criteriaQuery.where(predicates.toArray(new Predicate[0]));
         return entityManager.createQuery(criteriaQuery).setFirstResult((page - 1) * size).setMaxResults(size).getResultList();
+    }
+
+    private CriteriaQuery<GiftCertificate> createGetAllQuery(Map<String, String> params) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<GiftCertificate> criteriaQuery = criteriaBuilder.createQuery(GiftCertificate.class);
+        Root<GiftCertificate> root = criteriaQuery.from(GiftCertificate.class);
+        List<Predicate> predicates = new ArrayList<>();
+
+        if (params.get("sort").equals("ASC")) {
+            criteriaQuery.orderBy(criteriaBuilder.asc(root.get("name")));
+        } else {
+            criteriaQuery.orderBy(criteriaBuilder.desc(root.get("name")));
+        }
+
+        if (!params.get("tag").isEmpty()) {
+            Optional<Tag> optionalTag = tagDao.findTagByName(params.get("tag"));
+            if (optionalTag.isPresent()) {
+                Tag tag = optionalTag.get();
+                predicates.add(criteriaBuilder.isMember(tag, root.get("tags")));
+            } else {
+                throw new IllegalArgumentException("Tag doesn't exist");
+            }
+        }
+
+        if (!params.get("search").isEmpty()) {
+            predicates.add(criteriaBuilder.like(root.get("name"),"%" + params.get("search") + "%"));
+        }
+
+        criteriaQuery.where(predicates.toArray(new Predicate[0]));
+        return criteriaQuery;
     }
 }
