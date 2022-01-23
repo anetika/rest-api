@@ -17,6 +17,8 @@ import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -67,6 +69,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     @Override
     @Transactional
     public List<GiftCertificateDto> getAll(int page, int size, Map<String, String> params) {
+        validateParams(params);
         paginationUtil.validatePaginationInfo(page, size);
         List<GiftCertificate> certificates = certificateDao.findAll(page, size, params);
         if (certificates.isEmpty()) {
@@ -170,5 +173,35 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
             throw new ResourceNotFoundException("Resource not found");
         }
         return giftCertificates.stream().map(converter::convertEntityToDto).collect(Collectors.toList());
+    }
+
+    private void validateParams(Map<String, String> params) {
+        validateTagParameter(params.get("tag"));
+        validateSortParameter(params.get("sort"));
+        validateSearchParameter(params.get("search"));
+    }
+
+    private void validateSearchParameter(String search) {
+        Pattern pattern = Pattern.compile("^[A-Za-z]+$");
+        Matcher matcher = pattern.matcher(search);
+        if (!search.equals("") && !matcher.matches()) {
+            throw new IllegalArgumentException("Incorrect search parameter");
+        }
+    }
+
+    private void validateSortParameter(String sort) {
+        Pattern pattern = Pattern.compile("^(ASC|DESC)$");
+        Matcher matcher = pattern.matcher(sort);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("Incorrect sort parameter");
+        }
+    }
+
+    private void validateTagParameter(String tag) {
+        Pattern pattern = Pattern.compile("^[A-Za-z0-9_]{3,16}$");
+        Matcher matcher = pattern.matcher(tag);
+        if (!tag.equals("") && !matcher.matches()) {
+            throw new IllegalArgumentException("Incorrect tag parameter");
+        }
     }
 }

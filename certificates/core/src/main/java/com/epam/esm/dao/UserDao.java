@@ -14,7 +14,7 @@ public interface UserDao {
      *
      * @return the user with highest cost of all orders
      */
-    long getUserByHighestCostOfAllOrders();
+    long getMostWidelyUsedTagOfUserByHighestCostOfAllOrders();
 
     /**
      * Saves a user.

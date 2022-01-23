@@ -23,7 +23,7 @@ public class UserController {
         this.hateoasUtil = hateoasUtil;
     }
 
-    @PostMapping("/users/{userId}/certificates/{certificateId}")
+    @PostMapping("/users/{userId}/certificates/{certificateId}/orders")
     public ResponseEntity<OrderDto> buyCertificate(@PathVariable long certificateId, @PathVariable long userId) {
         OrderDto dto = service.buyCertificate(userId, certificateId);
         return new ResponseEntity<>(dto, HttpStatus.OK);

@@ -4,6 +4,7 @@ import com.epam.esm.converter.OrderConverter;
 import com.epam.esm.converter.TagConverter;
 import com.epam.esm.converter.UserConverter;
 import com.epam.esm.dao.GiftCertificateDao;
+import com.epam.esm.dao.TagDao;
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.dto.OrderDto;
 import com.epam.esm.dto.TagDto;
@@ -31,14 +32,16 @@ public class UserServiceImpl implements UserService {
     private final OrderConverter orderConverter;
     private final TagConverter tagConverter;
     private final PaginationUtil paginationUtil;
+    private final TagDao tagDao;
 
-    public UserServiceImpl(UserDao userDao, GiftCertificateDao certificateDao, UserConverter converter, OrderConverter orderConverter, TagConverter tagConverter, PaginationUtil paginationUtil) {
+    public UserServiceImpl(UserDao userDao, GiftCertificateDao certificateDao, UserConverter converter, OrderConverter orderConverter, TagConverter tagConverter, PaginationUtil paginationUtil, TagDao tagDao) {
         this.userDao = userDao;
         this.certificateDao = certificateDao;
         this.converter = converter;
         this.orderConverter = orderConverter;
         this.tagConverter = tagConverter;
         this.paginationUtil = paginationUtil;
+        this.tagDao = tagDao;
     }
 
     @Override
@@ -96,25 +99,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public TagDto getMostWidelyUsedTag() {
-        long userId = userDao.getUserByHighestCostOfAllOrders();
-        Optional<User> optionalUser = userDao.findById(userId);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            List<Order> orders = user.getOrders();
-            Map<Tag, Integer> tagMap = new HashMap<>();
-            orders.forEach(a -> a.getCertificate().getTags().forEach(b -> {
-                if (tagMap.containsKey(b)) {
-                    tagMap.replace(b, tagMap.get(b) + 1);
-                } else {
-                    tagMap.put(b, 1);
-                }
-            }));
-            int maxValue = Collections.max(tagMap.values());
-            Optional<Map.Entry<Tag, Integer>> optional = tagMap.entrySet().stream().filter(a -> a.getValue() == maxValue).findFirst();
-            if (optional.isPresent()) {
-                Tag tag = optional.get().getKey();
-                return tagConverter.convertEntityToDto(tag);
-            }
+        long tagId = userDao.getMostWidelyUsedTagOfUserByHighestCostOfAllOrders();
+        Optional<Tag> optionalTag = tagDao.findById(tagId);
+        if (optionalTag.isPresent()){
+            return tagConverter.convertEntityToDto(optionalTag.get());
         }
         throw new ResourceNotFoundException("Resource not found");
     }
