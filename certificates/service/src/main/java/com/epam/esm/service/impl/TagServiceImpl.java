@@ -7,10 +7,11 @@ import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.TagService;
 import com.epam.esm.util.PaginationUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -49,13 +50,12 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public List<TagDto> getAll(int page, int size) {
-        paginationUtil.validatePaginationInfo(page, size);
-        List<Tag> tags = tagDao.findAll(page, size);
+    public Page<TagDto> getAll(Pageable pageable) {
+        Page<Tag> tags = tagDao.findAll(pageable);
         if (tags.isEmpty()) {
             throw new ResourceNotFoundException("Resource not found");
         }
-        return tags.stream().map(converter::convertEntityToDto).collect(Collectors.toList());
+        return new PageImpl<>(tags.getContent().stream().map(converter::convertEntityToDto).collect(Collectors.toList()));
     }
 
     @Override

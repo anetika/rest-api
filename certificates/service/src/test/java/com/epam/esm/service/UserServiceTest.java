@@ -9,13 +9,15 @@ import com.epam.esm.dao.UserDao;
 import com.epam.esm.dto.UserDto;
 import com.epam.esm.entity.User;
 import com.epam.esm.service.impl.UserServiceImpl;
-import com.epam.esm.util.PaginationUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,9 +39,6 @@ public class UserServiceTest {
 
     @Mock
     private UserConverter userConverter;
-
-    @Mock
-    private PaginationUtil paginationUtil;
 
     private final List<User> users = new ArrayList<>();
     private final List<UserDto> userDtos = new ArrayList<>();
@@ -80,7 +79,7 @@ public class UserServiceTest {
 
     @Test
     public void getById_ValidId_Success() {
-        when(userDao.findById(1)).thenReturn(Optional.of(users.get(0)));
+        when(userDao.findById(1L)).thenReturn(Optional.of(users.get(0)));
         when(userConverter.convertEntityToDto(users.get(0))).thenReturn(userDtos.get(0));
         UserDto userDto = userService.getById(1);
         assertEquals(userDto, userDtos.get(0));
@@ -88,11 +87,10 @@ public class UserServiceTest {
 
     @Test
     public void getAll_Success() {
-        doNothing().when(paginationUtil).validatePaginationInfo(any(Integer.class), any(Integer.class));
-        when(userDao.findAll(1, 2)).thenReturn(users);
+        when(userDao.findAll(PageRequest.of(0, 2))).thenReturn(new PageImpl<>(users));
         when(userConverter.convertEntityToDto(users.get(0))).thenReturn(userDtos.get(0));
         when(userConverter.convertEntityToDto(users.get(1))).thenReturn(userDtos.get(1));
-        List<UserDto> list = userService.getAll(1, 2);
-        assertEquals(list, userDtos);
+        Page<UserDto> page = userService.getAll(PageRequest.of(0, 2));
+        assertEquals(page.getContent(), userDtos);
     }
 }

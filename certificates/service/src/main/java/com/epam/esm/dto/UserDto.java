@@ -29,5 +29,8 @@ public class UserDto extends RepresentationModel<UserDto> {
     @NotNull
     @Email
     private String email;
+
+    private String username;
+
     private List<OrderDto> orderDtoList;
 }

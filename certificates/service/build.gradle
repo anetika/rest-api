@@ -3,13 +3,6 @@ version '1.0-SNAPSHOT'
 
 dependencies {
     implementation project(':core')
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter', version: '2.6.2'
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.2.0'
-    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.6.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-}
-
-test {
-    useJUnitPlatform()
+    implementation project(':security')
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter', version: springVersion
 }

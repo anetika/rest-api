@@ -4,18 +4,22 @@ import com.epam.esm.converter.OrderConverter;
 import com.epam.esm.converter.TagConverter;
 import com.epam.esm.converter.UserConverter;
 import com.epam.esm.dao.GiftCertificateDao;
+import com.epam.esm.dao.RoleDao;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.dao.UserDao;
-import com.epam.esm.dto.OrderDto;
-import com.epam.esm.dto.TagDto;
-import com.epam.esm.dto.UserDto;
-import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.entity.Order;
-import com.epam.esm.entity.Tag;
-import com.epam.esm.entity.User;
+import com.epam.esm.dto.*;
+import com.epam.esm.entity.*;
 import com.epam.esm.exception.ResourceNotFoundException;
+import com.epam.esm.jwt.JwtTokenProvider;
 import com.epam.esm.service.UserService;
 import com.epam.esm.util.PaginationUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,8 +37,12 @@ public class UserServiceImpl implements UserService {
     private final TagConverter tagConverter;
     private final PaginationUtil paginationUtil;
     private final TagDao tagDao;
+    private final RoleDao roleDao;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public UserServiceImpl(UserDao userDao, GiftCertificateDao certificateDao, UserConverter converter, OrderConverter orderConverter, TagConverter tagConverter, PaginationUtil paginationUtil, TagDao tagDao) {
+    public UserServiceImpl(UserDao userDao, GiftCertificateDao certificateDao, UserConverter converter, OrderConverter orderConverter, TagConverter tagConverter, PaginationUtil paginationUtil, TagDao tagDao, RoleDao roleDao, BCryptPasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
         this.userDao = userDao;
         this.certificateDao = certificateDao;
         this.converter = converter;
@@ -42,12 +50,31 @@ public class UserServiceImpl implements UserService {
         this.tagConverter = tagConverter;
         this.paginationUtil = paginationUtil;
         this.tagDao = tagDao;
+        this.roleDao = roleDao;
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
     @Transactional
     public UserDto add(UserDto userDto) {
         User user = converter.convertDtoToEntity(userDto);
+        return converter.convertEntityToDto(userDao.save(user));
+    }
+
+    @Override
+    public UserDto register(RegistrationRequestDto requestDto) {
+        User user = new User();
+        Role roleUser = roleDao.findByRoleName("ROLE_USER");
+        List<Role> userRoles = new ArrayList<>();
+        userRoles.add(roleUser);
+        user.setPassword(passwordEncoder.encode(requestDto.getPassword()));
+        user.setRoles(userRoles);
+        user.setUsername(requestDto.getUsername());
+        user.setFirstName(requestDto.getFirstName());
+        user.setLastName(requestDto.getLastName());
+        user.setEmail(requestDto.getEmail());
         return converter.convertEntityToDto(userDao.save(user));
     }
 
@@ -61,13 +88,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> getAll(int page, int size) {
-        paginationUtil.validatePaginationInfo(page, size);
-        List<User> users = userDao.findAll(page, size);
-        if (users.isEmpty()){
+    public Page<UserDto> getAll(Pageable pageable) {
+        Page<User> users = userDao.findAll(pageable);
+        if (users.isEmpty()) {
             throw new ResourceNotFoundException("Resource not found");
         }
-        return users.stream().map(converter::convertEntityToDto).collect(Collectors.toList());
+        return new PageImpl<>(users.getContent().stream().map(converter::convertEntityToDto).collect(Collectors.toList()));
+    }
+
+    @Override
+    public UserDto findUserByUserName(String username) {
+        Optional<User> result = userDao.findUserByUsername(username);
+        if (result.isPresent()) {
+            return  converter.convertEntityToDto(result.get());
+        }
+        throw new ResourceNotFoundException("Resource not found");
     }
 
     @Override
@@ -105,5 +140,20 @@ public class UserServiceImpl implements UserService {
             return tagConverter.convertEntityToDto(optionalTag.get());
         }
         throw new ResourceNotFoundException("Resource not found");
+    }
+
+    @Override
+    public AuthenticationResponseDto login(AuthenticationRequestDto requestDto) {
+        String username = requestDto.getUsername();
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, requestDto.getPassword()));
+        Optional<User> optionalUser = userDao.findUserByUsername(username);
+        if (optionalUser.isEmpty()) {
+            throw new UsernameNotFoundException("User with username " + username + " not found");
+        }
+        String token = jwtTokenProvider.createToken(optionalUser.get());
+        return AuthenticationResponseDto.builder()
+                .username(username)
+                .token(token)
+                .build();
     }
 }

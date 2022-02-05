@@ -6,17 +6,34 @@ allprojects {
     sourceCompatibility = '11'
     targetCompatibility = '11'
 
+    ext {
+        springVersion = '2.6.2'
+        lombokVersion = '1.18.16'
+    }
+
     repositories {
         mavenCentral()
     }
 
     dependencies {
-        implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '2.6.2'
-        implementation group: 'org.springframework.boot', name: 'spring-boot-starter-hateoas', version: '2.6.2'
-        implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: '2.6.2'
+        implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: springVersion
+        implementation group: 'org.springframework.boot', name: 'spring-boot-starter-hateoas', version: springVersion
+        implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: springVersion
+        implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springVersion
         implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.3'
         implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.13.1'
-        implementation 'org.projectlombok:lombok:1.18.16'
-        annotationProcessor 'org.projectlombok:lombok:1.18.20'
+        implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: '2.6.3'
+        implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+        implementation group: 'org.springframework.security.oauth.boot', name: 'spring-security-oauth2-autoconfigure', version: '2.6.3'
+        compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+        annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+        testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.2.0'
+        testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springVersion
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+    }
+
+    test {
+        useJUnitPlatform()
     }
 }

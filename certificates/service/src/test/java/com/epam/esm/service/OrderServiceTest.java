@@ -104,7 +104,7 @@ public class OrderServiceTest {
         when(orderConverter.convertEntityToDto(orders.get(0))).thenReturn(orderDtos.get(0));
         when(orderConverter.convertEntityToDto(orders.get(1))).thenReturn(orderDtos.get(1));
         Set<OrderDto> resultDtos = orderService.getOrdersByUserId(1);
-        assertEquals(new ArrayList<>(resultDtos), orderDtos);
+        assertEquals(resultDtos, new HashSet<>(orderDtos));
     }
 
     @Test

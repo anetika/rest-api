@@ -1,16 +1,15 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.dto.OrderDto;
-import com.epam.esm.dto.TagDto;
-import com.epam.esm.dto.UserDto;
+import com.epam.esm.dto.*;
 import com.epam.esm.service.UserService;
 import com.epam.esm.util.HateoasUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 public class UserController {
@@ -23,8 +22,8 @@ public class UserController {
         this.hateoasUtil = hateoasUtil;
     }
 
-    @PostMapping("/users/{userId}/certificates/{certificateId}/orders")
-    public ResponseEntity<OrderDto> buyCertificate(@PathVariable long certificateId, @PathVariable long userId) {
+    @PostMapping("/orders")
+    public ResponseEntity<OrderDto> buyCertificate(@RequestParam long certificateId, @RequestParam long userId) {
         OrderDto dto = service.buyCertificate(userId, certificateId);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
@@ -51,11 +50,11 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<UserDto>> getAll(
+    public ResponseEntity<Page<UserDto>> getAll(
             @RequestParam(value = "page", defaultValue = "1", required = false) int page,
             @RequestParam(value = "size", defaultValue = "5", required = false) int size
     ) {
-        List<UserDto> resultDtos = service.getAll(page, size);
+        Page<UserDto> resultDtos = service.getAll(PageRequest.of(page, size));
         resultDtos.forEach(hateoasUtil::attacheUserLink);
         return new ResponseEntity<>(resultDtos, HttpStatus.OK);
     }

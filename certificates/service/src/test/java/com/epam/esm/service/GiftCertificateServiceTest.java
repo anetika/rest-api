@@ -8,13 +8,15 @@ import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.impl.GiftCertificateServiceImpl;
-import com.epam.esm.util.PaginationUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -38,9 +40,6 @@ public class GiftCertificateServiceTest {
 
     @Mock
     private GiftCertificateConverter certificateConverter;
-
-    @Mock
-    private PaginationUtil paginationUtil;
 
     private final List<GiftCertificateDto> dtos = new ArrayList<>();
 
@@ -119,18 +118,16 @@ public class GiftCertificateServiceTest {
 
     @Test
     public void getAll_Success() {
-        doNothing().when(paginationUtil).validatePaginationInfo(any(Integer.class), any(Integer.class));
-        when(certificateDao.findAll(1, 3, params)).thenReturn(certificates);
+        when(certificateDao.findAll(params, PageRequest.of(0, 3))).thenReturn(new PageImpl<>(certificates));
         when(certificateConverter.convertEntityToDto(certificates.get(0))).thenReturn(dtos.get(0));
         when(certificateConverter.convertEntityToDto(certificates.get(1))).thenReturn(dtos.get(1));
         when(certificateConverter.convertEntityToDto(certificates.get(2))).thenReturn(dtos.get(2));
-        List<GiftCertificateDto> list = service.getAll(1, 3, params);
-        assertEquals(list, dtos);
+        Page<GiftCertificateDto> page = service.getAll(params, PageRequest.of(0, 3));
+        assertEquals(page.getContent(), dtos);
     }
 
     @Test
     public void deleteById_CorrectId_Success() {
-        doNothing().when(paginationUtil).validatePaginationInfo(any(Integer.class), any(Integer.class));
         when(certificateDao.findById(1)).thenReturn(Optional.of(certificates.get(0)));
         doAnswer(invocation -> {
             dtos.remove(0);
@@ -138,26 +135,23 @@ public class GiftCertificateServiceTest {
             return null;
         }).when(certificateDao).deleteById(1);
         service.deleteById(1);
-        when(certificateDao.findAll(1, 2, params)).thenReturn(certificates);
+        when(certificateDao.findAll(params, PageRequest.of(0, 2))).thenReturn(new PageImpl<>(certificates));
         when(certificateConverter.convertEntityToDto(certificates.get(0))).thenReturn(dtos.get(0));
         when(certificateConverter.convertEntityToDto(certificates.get(1))).thenReturn(dtos.get(1));
-        List<GiftCertificateDto> certificateDtoList = service.getAll(1, 2, params);
-        assertEquals(certificateDtoList, dtos);
+        Page<GiftCertificateDto> page = service.getAll(params, PageRequest.of(0, 2));
+        assertEquals(page.getContent(), dtos);
     }
 
     @Test
     public void deleteAll_Success() {
-        int page = 0;
-        int size = 3;
-        doNothing().when(paginationUtil).validatePaginationInfo(any(Integer.class), any(Integer.class));
         doAnswer(invocation -> {
             certificates.clear();
             return null;
         }).when(tagDao).deleteAll();
         service.deleteAll();
         dtos.clear();
-        when(certificateDao.findAll(page, size, params)).thenReturn(certificates);
-        assertThrows(ResourceNotFoundException.class, () -> service.getAll(page, size, params));
+        when(certificateDao.findAll(params, PageRequest.of(0, 3))).thenReturn(new PageImpl<>(certificates));
+        assertThrows(ResourceNotFoundException.class, () -> service.getAll(params, PageRequest.of(0, 3)));
     }
 
     @Test

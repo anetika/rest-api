@@ -1,8 +1,8 @@
 package com.epam.esm.service;
 
-import com.epam.esm.dto.OrderDto;
-import com.epam.esm.dto.TagDto;
-import com.epam.esm.dto.UserDto;
+import com.epam.esm.dto.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public interface UserService {
      * @return the user dto
      */
     UserDto add(UserDto user);
-
+    UserDto register(RegistrationRequestDto requestDto);
     /**
      * Gets a user dto by id.
      *
@@ -29,12 +29,11 @@ public interface UserService {
     /**
      * Gets all user dtos.
      *
-     * @param page the page
-     * @param size the size
      * @return the list of all user dtos
      */
-    List<UserDto> getAll(int page, int size);
+    Page<UserDto> getAll(Pageable pageable);
 
+    UserDto findUserByUserName(String username);
     /**
      * Buys a certificate.
      *
@@ -50,4 +49,6 @@ public interface UserService {
      * @return the most widely used tag dto
      */
     TagDto getMostWidelyUsedTag();
+
+    AuthenticationResponseDto login(AuthenticationRequestDto requestDto);
 }
