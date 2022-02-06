@@ -10,6 +10,7 @@ public class AllEntityReadRequestMatcher implements RequestMatcher {
     private static final String READ_CERTIFICATES_ENDPOINT = "/certificates";
     private static final String READ_TAGS_ENDPOINT = "/tags";
     private static final String READ_ORDERS_ENDPOINT = "/orders";
+    private static final String READ_USERS_ENDPOINT = "/users";
 
     @Override
     public boolean matches(HttpServletRequest request) {
@@ -18,7 +19,8 @@ public class AllEntityReadRequestMatcher implements RequestMatcher {
         if (method != null && method.equals(GET_METHOD)) {
             return requestURI.startsWith(READ_CERTIFICATES_ENDPOINT)
                     || requestURI.startsWith(READ_TAGS_ENDPOINT)
-                    || requestURI.startsWith(READ_ORDERS_ENDPOINT);
+                    || requestURI.startsWith(READ_ORDERS_ENDPOINT)
+                    || requestURI.startsWith(READ_USERS_ENDPOINT);
         }
         return false;
     }

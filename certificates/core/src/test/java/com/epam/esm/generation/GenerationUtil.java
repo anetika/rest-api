@@ -9,6 +9,8 @@ import com.epam.esm.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -18,12 +20,17 @@ import java.util.Random;
 
 @SpringBootTest
 public class GenerationUtil {
+
     @Autowired
     private TagDao tagDao;
+
     @Autowired
     private GiftCertificateDao certificateDao;
+
     @Autowired
     private UserDao userDao;
+
+    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     private final Random random = new Random();
 
@@ -62,6 +69,8 @@ public class GenerationUtil {
             user.setEmail("user" + i + "@mail.ru");
             user.setFirstName("User" + i);
             user.setLastName("UserLastName" + i);
+            user.setUsername("user" + i);
+            user.setPassword(passwordEncoder.encode("123456"));
             userDao.save(user);
         }
     }

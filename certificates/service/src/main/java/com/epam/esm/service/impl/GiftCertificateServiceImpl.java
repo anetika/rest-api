@@ -10,7 +10,6 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.GiftCertificateService;
-import com.epam.esm.util.PaginationUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -34,14 +33,12 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     private final GiftCertificateConverter converter;
     private final GiftCertificateDao certificateDao;
     private final TagDao tagDao;
-    private final PaginationUtil paginationUtil;
 
-    public GiftCertificateServiceImpl(TagConverter tagConverter, GiftCertificateConverter converter, GiftCertificateDao certificateDao, TagDao tagDao, PaginationUtil paginationUtil) {
+    public GiftCertificateServiceImpl(TagConverter tagConverter, GiftCertificateConverter converter, GiftCertificateDao certificateDao, TagDao tagDao) {
         this.tagConverter = tagConverter;
         this.converter = converter;
         this.certificateDao = certificateDao;
         this.tagDao = tagDao;
-        this.paginationUtil = paginationUtil;
     }
 
     @Override
@@ -165,7 +162,6 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     @Override
     @Transactional
     public List<GiftCertificateDto> getGiftCertificateByTags(List<TagDto> tagDtos, int page, int size) {
-        paginationUtil.validatePaginationInfo(page, size);
         List<Tag> tags = tagDtos.stream().map(tagConverter::convertDtoToEntity).collect(Collectors.toList());
         for (var tag : tags) {
             Optional<Tag> optionalTag = tagDao.findTagByName(tag.getName());

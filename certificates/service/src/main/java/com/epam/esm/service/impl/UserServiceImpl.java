@@ -12,7 +12,6 @@ import com.epam.esm.entity.*;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.jwt.JwtTokenProvider;
 import com.epam.esm.service.UserService;
-import com.epam.esm.util.PaginationUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -35,20 +34,18 @@ public class UserServiceImpl implements UserService {
     private final UserConverter converter;
     private final OrderConverter orderConverter;
     private final TagConverter tagConverter;
-    private final PaginationUtil paginationUtil;
     private final TagDao tagDao;
     private final RoleDao roleDao;
     private final BCryptPasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public UserServiceImpl(UserDao userDao, GiftCertificateDao certificateDao, UserConverter converter, OrderConverter orderConverter, TagConverter tagConverter, PaginationUtil paginationUtil, TagDao tagDao, RoleDao roleDao, BCryptPasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
+    public UserServiceImpl(UserDao userDao, GiftCertificateDao certificateDao, UserConverter converter, OrderConverter orderConverter, TagConverter tagConverter, TagDao tagDao, RoleDao roleDao, BCryptPasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
         this.userDao = userDao;
         this.certificateDao = certificateDao;
         this.converter = converter;
         this.orderConverter = orderConverter;
         this.tagConverter = tagConverter;
-        this.paginationUtil = paginationUtil;
         this.tagDao = tagDao;
         this.roleDao = roleDao;
         this.passwordEncoder = passwordEncoder;
@@ -64,7 +61,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto register(RegistrationRequestDto requestDto) {
+    public UserDto register(RegistrationDto requestDto) {
         User user = new User();
         Role roleUser = roleDao.findByRoleName("ROLE_USER");
         List<Role> userRoles = new ArrayList<>();
@@ -107,9 +104,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public OrderDto buyCertificate(long userId, long certificateId) {
+    public OrderDto buyCertificate(BuyCertificateDto buyCertificateDto) {
         Order order = new Order();
-        Optional<GiftCertificate> optionalGiftCertificate = certificateDao.findById(certificateId);
+        Optional<GiftCertificate> optionalGiftCertificate = certificateDao.findById(buyCertificateDto.getCertificateId());
         if (optionalGiftCertificate.isPresent()){
             GiftCertificate certificate = optionalGiftCertificate.get();
             order.setCertificate(certificate);
@@ -118,7 +115,7 @@ public class UserServiceImpl implements UserService {
             throw new ResourceNotFoundException("Resource not found");
         }
         order.setOrderDate(LocalDateTime.now());
-        Optional<User> optionalUser = userDao.findById(userId);
+        Optional<User> optionalUser = userDao.findById(buyCertificateDto.getUserId());
         if (optionalUser.isEmpty()) {
             throw new ResourceNotFoundException("Resource not found");
         } else {
@@ -143,7 +140,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public AuthenticationResponseDto login(AuthenticationRequestDto requestDto) {
+    public AuthenticationResponseDto login(AuthenticationDto requestDto) {
         String username = requestDto.getUsername();
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, requestDto.getPassword()));
         Optional<User> optionalUser = userDao.findUserByUsername(username);

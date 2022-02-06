@@ -2,23 +2,26 @@ package com.epam.esm.jwt;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.User;
 
 import java.util.Collection;
 
 @Getter
-public class JwtUser implements UserDetails {
+@Setter
+public class JwtUser extends User {
 
-    private final long id;
-    private final String username;
-    private final String firstName;
-    private final String lastName;
-    private final String password;
-    private final String email;
-    private final Collection<? extends GrantedAuthority> authorities;
+    private long id;
+    private String username;
+    private String firstName;
+    private String lastName;
+    private String password;
+    private String email;
+    private Collection<GrantedAuthority> authorities;
 
-    public JwtUser(long id, String username, String firstName, String lastName, String password, String email, Collection<? extends GrantedAuthority> authorities) {
+    public JwtUser(long id, String username, String firstName, String lastName, String password, String email, Collection<GrantedAuthority> authorities) {
+        super(username, password, authorities);
         this.id = id;
         this.username = username;
         this.firstName = firstName;
@@ -29,7 +32,7 @@ public class JwtUser implements UserDetails {
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
+    public Collection<GrantedAuthority> getAuthorities() {
         return authorities;
     }
 

@@ -8,7 +8,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -26,10 +30,28 @@ public class CustomExceptionHandler {
         this.charsetUtil = charsetUtil;
     }
 
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ExceptionMessage> handleAuthenticationException(){
+    @ExceptionHandler({BadCredentialsException.class, UsernameNotFoundException.class})
+    public ResponseEntity<ExceptionMessage> handleUsernameNotFoundException() {
+        String message = translator.toLocale("user_not_found_message");
+        ExceptionMessage mes = new ExceptionMessage(message, HttpStatus.NOT_FOUND.value());
+        ResponseEntity<ExceptionMessage> responseEntity = new ResponseEntity<>(mes, HttpStatus.NOT_FOUND);
+        charsetUtil.changeExceptionResponseCharset(responseEntity);
+        return responseEntity;
+    }
+
+    @ExceptionHandler(InsufficientAuthenticationException.class)
+    public ResponseEntity<ExceptionMessage> handleInsufficientAuthenticationException() {
+        String message = translator.toLocale("incorrect_token_exception_message");
+        ExceptionMessage mes = new ExceptionMessage(message, HttpStatus.BAD_REQUEST.value());
+        ResponseEntity<ExceptionMessage> responseEntity = new ResponseEntity<>(mes, HttpStatus.BAD_REQUEST);
+        charsetUtil.changeExceptionResponseCharset(responseEntity);
+        return responseEntity;
+    }
+
+    @ExceptionHandler({AuthenticationException.class, AccessDeniedException.class})
+    public ResponseEntity<ExceptionMessage> handleAuthenticationException() {
         String message = translator.toLocale("error403_message");
-        ExceptionMessage mes = new ExceptionMessage(message, HttpStatus.FORBIDDEN, HttpStatus.FORBIDDEN.value());
+        ExceptionMessage mes = new ExceptionMessage(message, HttpStatus.FORBIDDEN.value());
         ResponseEntity<ExceptionMessage> responseEntity = new ResponseEntity<>(mes, HttpStatus.FORBIDDEN);
         charsetUtil.changeExceptionResponseCharset(responseEntity);
         return responseEntity;
@@ -38,7 +60,7 @@ public class CustomExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ExceptionMessage> handleDataIntegrityViolationException() {
         String message = translator.toLocale("error226_message");
-            ExceptionMessage mes = new ExceptionMessage(message, HttpStatus.IM_USED, HttpStatus.IM_USED.value());
+            ExceptionMessage mes = new ExceptionMessage(message, HttpStatus.IM_USED.value());
         ResponseEntity<ExceptionMessage> responseEntity = new ResponseEntity<>(mes, HttpStatus.IM_USED);
         charsetUtil.changeExceptionResponseCharset(responseEntity);
         return responseEntity;
@@ -47,7 +69,7 @@ public class CustomExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ExceptionMessage> handleResourceNotFoundException() {
         String message = translator.toLocale("error404_message");
-        ExceptionMessage mes = new ExceptionMessage(message, HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.value());
+        ExceptionMessage mes = new ExceptionMessage(message, HttpStatus.NOT_FOUND.value());
         ResponseEntity<ExceptionMessage> responseEntity = new ResponseEntity<>(mes, HttpStatus.NOT_FOUND);
         charsetUtil.changeExceptionResponseCharset(responseEntity);
         return responseEntity;
@@ -56,7 +78,7 @@ public class CustomExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ExceptionMessage> handleHttpMessageNotReadableException() {
         String message = translator.toLocale("message_not_readable");
-        ExceptionMessage mes = new ExceptionMessage(message, HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.value());
+        ExceptionMessage mes = new ExceptionMessage(message, HttpStatus.BAD_REQUEST.value());
         ResponseEntity<ExceptionMessage> responseEntity = new ResponseEntity<>(mes, HttpStatus.BAD_REQUEST);
         charsetUtil.changeExceptionResponseCharset(responseEntity);
         return responseEntity;
@@ -65,7 +87,7 @@ public class CustomExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionMessage> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         String message = translator.toLocale("validation_exception_message");
-        ExceptionMessage mes = new ExceptionMessage(String.format(message, Objects.requireNonNull(e.getFieldError()).getField()), HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.value());
+        ExceptionMessage mes = new ExceptionMessage(String.format(message, Objects.requireNonNull(e.getFieldError()).getField()), HttpStatus.BAD_REQUEST.value());
         ResponseEntity<ExceptionMessage> responseEntity = new ResponseEntity<>(mes, HttpStatus.BAD_REQUEST);
         charsetUtil.changeExceptionResponseCharset(responseEntity);
         return responseEntity;
@@ -74,7 +96,7 @@ public class CustomExceptionHandler {
     @ExceptionHandler({IllegalArgumentException.class, MethodArgumentTypeMismatchException.class})
     public ResponseEntity<ExceptionMessage> handleIllegalArgumentException() {
         String message = translator.toLocale("argument_exception_message");
-        ExceptionMessage mes = new ExceptionMessage(message, HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.value());
+        ExceptionMessage mes = new ExceptionMessage(message, HttpStatus.BAD_REQUEST.value());
         ResponseEntity<ExceptionMessage> responseEntity = new ResponseEntity<>(mes, HttpStatus.BAD_REQUEST);
         charsetUtil.changeExceptionResponseCharset(responseEntity);
         return responseEntity;
@@ -83,7 +105,7 @@ public class CustomExceptionHandler {
     @ExceptionHandler(PaginationException.class)
     public ResponseEntity<ExceptionMessage> handlePaginationException() {
         String message = translator.toLocale("pagination_exception_message");
-        ExceptionMessage mes = new ExceptionMessage(message, HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.value());
+        ExceptionMessage mes = new ExceptionMessage(message, HttpStatus.BAD_REQUEST.value());
         ResponseEntity<ExceptionMessage> responseEntity = new ResponseEntity<>(mes, HttpStatus.BAD_REQUEST);
         charsetUtil.changeExceptionResponseCharset(responseEntity);
         return responseEntity;
@@ -92,7 +114,7 @@ public class CustomExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ExceptionMessage> handleRuntimeException() {
         String message = translator.toLocale("error500_message");
-        ExceptionMessage mes = new ExceptionMessage(message, HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR.value());
+        ExceptionMessage mes = new ExceptionMessage(message, HttpStatus.INTERNAL_SERVER_ERROR.value());
         ResponseEntity<ExceptionMessage> responseEntity = new ResponseEntity<>(mes, HttpStatus.INTERNAL_SERVER_ERROR);
         charsetUtil.changeExceptionResponseCharset(responseEntity);
         return responseEntity;

@@ -6,7 +6,6 @@ import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.TagService;
-import com.epam.esm.util.PaginationUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -20,12 +19,10 @@ public class TagServiceImpl implements TagService {
 
     private final TagConverter converter;
     private final TagDao tagDao;
-    private final PaginationUtil paginationUtil;
 
-    public TagServiceImpl(TagConverter converter, TagDao tagDao, PaginationUtil paginationUtil) {
+    public TagServiceImpl(TagConverter converter, TagDao tagDao) {
         this.converter = converter;
         this.tagDao = tagDao;
-        this.paginationUtil = paginationUtil;
     }
 
 
