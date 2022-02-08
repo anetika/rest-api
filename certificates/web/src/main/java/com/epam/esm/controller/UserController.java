@@ -24,7 +24,7 @@ public class UserController {
     }
 
     @PostMapping("/orders")
-    @PreAuthorize("#buyCertificateDto.userId == principal.id")
+    @PreAuthorize("#buyCertificateDto.userId == principal.id && hasRole('USER') && !hasRole('ADMIN')")
     public ResponseEntity<OrderDto> buyCertificate(@RequestBody BuyCertificateDto buyCertificateDto) {
         OrderDto dto = service.buyCertificate(buyCertificateDto);
         return new ResponseEntity<>(dto, HttpStatus.OK);

@@ -42,8 +42,8 @@ public class CustomExceptionHandler {
     @ExceptionHandler(InsufficientAuthenticationException.class)
     public ResponseEntity<ExceptionMessage> handleInsufficientAuthenticationException() {
         String message = translator.toLocale("incorrect_token_exception_message");
-        ExceptionMessage mes = new ExceptionMessage(message, HttpStatus.BAD_REQUEST.value());
-        ResponseEntity<ExceptionMessage> responseEntity = new ResponseEntity<>(mes, HttpStatus.BAD_REQUEST);
+        ExceptionMessage mes = new ExceptionMessage(message, HttpStatus.FORBIDDEN.value());
+        ResponseEntity<ExceptionMessage> responseEntity = new ResponseEntity<>(mes, HttpStatus.FORBIDDEN);
         charsetUtil.changeExceptionResponseCharset(responseEntity);
         return responseEntity;
     }
