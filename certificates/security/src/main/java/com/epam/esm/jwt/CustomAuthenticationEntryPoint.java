@@ -1,6 +1,7 @@
 package com.epam.esm.jwt;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,10 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) {
-        resolver.resolveException(request, response, null, authException);
+        if (request.getHeader("Authorization") != null) {
+            resolver.resolveException(request, response, null, authException);
+        } else {
+            resolver.resolveException(request, response, null, new AccessDeniedException("Access denied"));
+        }
     }
 }
