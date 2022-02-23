@@ -6,7 +6,7 @@ import com.epam.esm.dao.UserDao;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;
-import org.junit.jupiter.api.Test;
+//import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -32,7 +32,7 @@ public class GenerationUtil {
 
     private final Random random = new Random();
 
-    @Test
+    //@Test
     public void generateTags(){
         for (int i = 0; i < 1000; i++) {
             Tag tag = new Tag();
@@ -41,9 +41,9 @@ public class GenerationUtil {
         }
     }
 
-    @Test
+    //@Test
     public void generateCertificates(){
-        for (int i = 0; i < 10000; i++){
+        for (int i = 3; i < 100; i++){
             GiftCertificate giftCertificate = new GiftCertificate();
             giftCertificate.setName("Certificate" + i);
             giftCertificate.setDescription("Certificate" + i + " description");
@@ -53,16 +53,16 @@ public class GenerationUtil {
             giftCertificate.setLastUpdateDate(LocalDateTime.now());
             giftCertificate.setTags(new HashSet<>());
             for (int j = 0; j < 10; j++){
-                int randomTagId = random.nextInt(1000) + 7;
+                int randomTagId = random.nextInt(1000) + 1;
                 giftCertificate.getTags().add(tagDao.findById((long) randomTagId).get());
             }
             certificateDao.save(giftCertificate);
         }
     }
 
-    @Test
+    //@Test
     public void generateUsers() {
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 100; i++) {
             User user = new User();
             user.setEmail("user" + i + "@mail.ru");
             user.setFirstName("User" + i);

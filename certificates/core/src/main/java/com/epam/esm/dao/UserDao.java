@@ -3,12 +3,14 @@ package com.epam.esm.dao;
 import com.epam.esm.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 /**
  * The interface that contains functionality for UserDao
  */
+@Repository
 public interface UserDao extends JpaRepository<User, Long> {
 
     Optional<User> findUserByUsername(String name);
