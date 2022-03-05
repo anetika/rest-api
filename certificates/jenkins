@@ -8,7 +8,7 @@ pipeline {
                 steps {
                     dir('./certificates') {
                         sh 'pwd'
-                        sh ".\gradlew.bat clean build codeCoverageReport -Dsonar.host.url=http://localhost:9000 -Dsonar.login=admin -Dsonar.password=BY_ak-777777 sonarqube"
+                        sh "gradle sonarqube"
                     }
                     withSonarQubeEnv(installationName: 'sonarqube') {
 
