@@ -8,6 +8,7 @@ pipeline {
                 steps {
                     dir('./certificates') {
                         sh 'pwd'
+                        sh 'gradle clean'
                         sh "gradle sonarqube"
                     }
                     withSonarQubeEnv(installationName: 'sonarqube') {
