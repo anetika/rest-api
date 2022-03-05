@@ -10,7 +10,7 @@ pipeline {
                         sh 'pwd'
                     }
                     withSonarQubeEnv(installationName: 'sonarqube') {
-                       sh "gradle sonarqube"
+                       sh "./certificates/gradlew sonarqube"
                     }
                 }
             }
