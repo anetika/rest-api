@@ -6,6 +6,5 @@ sonarqube {
         property 'sonar.projectKey', 'org.sonarqube.gradle-multi-module-jacoco'
         property 'sonar.sources', 'src'
         property 'sonar.tests', 'src'
-        property 'sonar.exclusions', '**/SecurityConfig.java'
     }
 }
