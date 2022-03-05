@@ -4,7 +4,7 @@ sonarqube {
     properties {
         property 'sonar.projectName', 'Example of SonarQube Scanner for Gradle Usage (multimodule with Jacoco code coverage)'
         property 'sonar.projectKey', 'org.sonarqube.gradle-multi-module-jacoco'
-        property 'sonar.sources', 'src'
-        property 'sonar.tests', 'src'
+        property 'sonar.sources', 'src/main/java'
+        //property 'sonar.tests', 'src'
     }
 }
