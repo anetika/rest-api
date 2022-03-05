@@ -6,6 +6,9 @@ pipeline {
         stages {
             stage('Scan') {
                 steps {
+                    dir('./certificates') {
+                        sh 'pwd'
+                    }
                     withSonarQubeEnv(installationName: 'sonarqube') {
                        sh "gradle sonarqube"
                     }
