@@ -4,6 +4,7 @@ plugins {
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     id "org.sonarqube" version "3.3"
     id "jacoco"
+    id "war"
 }
 
 group 'org.example'
@@ -13,6 +14,7 @@ allprojects {
     apply plugin: 'com.github.johnrengelman.shadow'
     apply plugin: 'org.sonarqube'
     apply plugin: 'jacoco'
+    apply plugin: 'war'
     sourceCompatibility = '11'
     targetCompatibility = '11'
 
@@ -68,6 +70,10 @@ shadowJar{
 }
 
 bootJar {
+    mainClass = 'com.epam.esm.WebMain'
+}
+
+bootWar {
     mainClass = 'com.epam.esm.WebMain'
 }
 
