@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 public class CertificateReadRequestMatcher implements RequestMatcher {
 
     private static final String GET_METHOD = "GET";
-    private static final String READ_CERTIFICATES_ENDPOINT = "/certificates";
+    private static final String READ_CERTIFICATES_ENDPOINT = "/certificates/certificates";
 
     @Override
     public boolean matches(HttpServletRequest request) {
