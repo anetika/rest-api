@@ -8,9 +8,9 @@ public class AllEntityReadRequestMatcher implements RequestMatcher {
 
     private static final String GET_METHOD = "GET";
     private static final String READ_CERTIFICATES_ENDPOINT = "/certificates/certificates";
-    private static final String READ_TAGS_ENDPOINT = "/tags";
-    private static final String READ_ORDERS_ENDPOINT = "/orders";
-    private static final String READ_USERS_ENDPOINT = "/users";
+    private static final String READ_TAGS_ENDPOINT = "/certificates/tags";
+    private static final String READ_ORDERS_ENDPOINT = "/certificates/orders";
+    private static final String READ_USERS_ENDPOINT = "/certificates/users";
 
     @Override
     public boolean matches(HttpServletRequest request) {

@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 public class OrderCreateRequestMatcher implements RequestMatcher {
 
     private static final String POST_METHOD = "POST";
-    private static final String CREATE_ORDER_ENDPOINT = "/orders";
+    private static final String CREATE_ORDER_ENDPOINT = "/certificates/orders";
 
     @Override
     public boolean matches(HttpServletRequest request) {
