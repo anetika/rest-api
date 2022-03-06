@@ -3,6 +3,7 @@ package com.epam.esm;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
@@ -32,5 +33,10 @@ public class WebMain extends SpringBootServletInitializer {
     @Bean
     public ServletWebServerFactory servletWebServerFactory(){
         return new TomcatServletWebServerFactory();
+    }
+
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+        return super.configure(builder);
     }
 }
