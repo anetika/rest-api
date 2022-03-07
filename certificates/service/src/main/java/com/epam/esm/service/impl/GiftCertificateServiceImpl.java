@@ -10,7 +10,9 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.GiftCertificateService;
-import com.epam.esm.util.PaginationUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -23,18 +25,20 @@ import java.util.stream.Collectors;
 
 @Service
 public class GiftCertificateServiceImpl implements GiftCertificateService {
+    private static final String TAG = "tag";
+    private static final String SORT = "sort";
+    private static final String SEARCH = "search";
+
     private final TagConverter tagConverter;
     private final GiftCertificateConverter converter;
     private final GiftCertificateDao certificateDao;
     private final TagDao tagDao;
-    private final PaginationUtil paginationUtil;
 
-    public GiftCertificateServiceImpl(TagConverter tagConverter, GiftCertificateConverter converter, GiftCertificateDao certificateDao, TagDao tagDao, PaginationUtil paginationUtil) {
+    public GiftCertificateServiceImpl(TagConverter tagConverter, GiftCertificateConverter converter, GiftCertificateDao certificateDao, TagDao tagDao) {
         this.tagConverter = tagConverter;
         this.converter = converter;
         this.certificateDao = certificateDao;
         this.tagDao = tagDao;
-        this.paginationUtil = paginationUtil;
     }
 
     @Override
@@ -68,14 +72,14 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     @Transactional
-    public List<GiftCertificateDto> getAll(int page, int size, Map<String, String> params) {
+    public Page<GiftCertificateDto> getAll(Map<String, String> params, Pageable pageable) {
         validateParams(params);
-        paginationUtil.validatePaginationInfo(page, size);
-        List<GiftCertificate> certificates = certificateDao.findAll(page, size, params);
+        //paginationUtil.validatePaginationInfo(page, size);
+        Page<GiftCertificate> certificates = certificateDao.findAll(params, pageable);
         if (certificates.isEmpty()) {
             throw new ResourceNotFoundException("Resource not found");
         }
-        return certificates.stream().map(converter::convertEntityToDto).collect(Collectors.toList());
+        return new PageImpl<>(certificates.getContent().stream().map(converter::convertEntityToDto).collect(Collectors.toList()));
     }
 
     @Override
@@ -158,7 +162,6 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     @Override
     @Transactional
     public List<GiftCertificateDto> getGiftCertificateByTags(List<TagDto> tagDtos, int page, int size) {
-        paginationUtil.validatePaginationInfo(page, size);
         List<Tag> tags = tagDtos.stream().map(tagConverter::convertDtoToEntity).collect(Collectors.toList());
         for (var tag : tags) {
             Optional<Tag> optionalTag = tagDao.findTagByName(tag.getName());
@@ -176,9 +179,9 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     private void validateParams(Map<String, String> params) {
-        validateTagParameter(params.get("tag"));
-        validateSortParameter(params.get("sort"));
-        validateSearchParameter(params.get("search"));
+        validateTagParameter(params.get(TAG));
+        validateSortParameter(params.get(SORT));
+        validateSearchParameter(params.get(SEARCH));
     }
 
     private void validateSearchParameter(String search) {

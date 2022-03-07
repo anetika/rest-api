@@ -6,13 +6,15 @@ import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.impl.TagServiceImpl;
-import com.epam.esm.util.PaginationUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +22,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,9 +31,6 @@ public class TagServiceTest {
 
     @Mock
     private TagConverter tagConverter;
-
-    @Mock
-    private PaginationUtil paginationUtil;
 
     @InjectMocks
     private TagServiceImpl tagService;
@@ -86,22 +84,16 @@ public class TagServiceTest {
 
     @Test
     public void getAll_Success() {
-        int page = 0;
-        int size = 3;
-        doNothing().when(paginationUtil).validatePaginationInfo(any(Integer.class), any(Integer.class));
-        when(tagDao.findAll(page, size)).thenReturn(tags);
+        when(tagDao.findAll(PageRequest.of(0, 3))).thenReturn(new PageImpl<>(tags));
         when(tagConverter.convertEntityToDto(tags.get(0))).thenReturn(tagDtos.get(0));
         when(tagConverter.convertEntityToDto(tags.get(1))).thenReturn(tagDtos.get(1));
         when(tagConverter.convertEntityToDto(tags.get(2))).thenReturn(tagDtos.get(2));
-        List<TagDto> resultDtos = tagService.getAll(page, size);
-        assertEquals(resultDtos, tagDtos);
+        Page<TagDto> page = tagService.getAll(PageRequest.of(0, 3));
+        assertEquals(page.getContent(), tagDtos);
     }
 
     @Test
     public void deleteById_CorrectId_Success() {
-        int page = 0;
-        int size = 3;
-        doNothing().when(paginationUtil).validatePaginationInfo(any(Integer.class), any(Integer.class));
         when(tagDao.findById(1L)).thenReturn(Optional.of(tags.get(0)));
         doAnswer(invocation -> {
             tags.remove(0);
@@ -109,25 +101,22 @@ public class TagServiceTest {
         }).when(tagDao).deleteById(1L);
         tagDtos.remove(0);
         tagService.deleteById(1L);
-        when(tagDao.findAll(page, size)).thenReturn(tags);
+        when(tagDao.findAll(PageRequest.of(0, 3))).thenReturn(new PageImpl<>(tags));
         when(tagConverter.convertEntityToDto(tags.get(0))).thenReturn(tagDtos.get(0));
         when(tagConverter.convertEntityToDto(tags.get(1))).thenReturn(tagDtos.get(1));
-        List<TagDto> resultDtos = tagService.getAll(page, size);
-        assertEquals(resultDtos, tagDtos);
+        Page<TagDto> page = tagService.getAll(PageRequest.of(0, 3));
+        assertEquals(page.getContent(), tagDtos);
     }
 
     @Test
     public void deleteAll_Success() {
-        int page = 0;
-        int size = 3;
-        doNothing().when(paginationUtil).validatePaginationInfo(any(Integer.class), any(Integer.class));
         doAnswer(invocation -> {
             tags.clear();
             return null;
         }).when(tagDao).deleteAll();
         tagService.deleteAll();
         tagDtos.clear();
-        when(tagDao.findAll(page, size)).thenReturn(tags);
-        assertThrows(ResourceNotFoundException.class, () -> tagService.getAll(page, size));
+        when(tagDao.findAll(PageRequest.of(0, 3))).thenReturn(new PageImpl<>(tags));
+        assertThrows(ResourceNotFoundException.class, () -> tagService.getAll(PageRequest.of(0, 3)));
     }
 }

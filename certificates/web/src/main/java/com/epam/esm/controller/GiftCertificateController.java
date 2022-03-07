@@ -6,6 +6,8 @@ import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.translator.Translator;
 import com.epam.esm.util.CharsetUtil;
 import com.epam.esm.util.HateoasUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +19,9 @@ import java.util.Map;
 
 @RestController
 public class GiftCertificateController {
+    private static final String TAG = "tag";
+    private static final String SORT = "sort";
+    private static final String SEARCH = "search";
 
     private final GiftCertificateService service;
     private final Translator translator;
@@ -55,17 +60,17 @@ public class GiftCertificateController {
     }
 
     @GetMapping("/certificates")
-    public ResponseEntity<List<GiftCertificateDto>> getAll(
+    public ResponseEntity<Page<GiftCertificateDto>> getAll(
             @RequestParam(value = "page", defaultValue = "1", required = false) int page,
             @RequestParam(value = "size", defaultValue = "5", required = false) int size,
-            @RequestParam(value = "sort", defaultValue = "ASC", required = false) String sort,
-            @RequestParam(value = "search", defaultValue = "", required = false) String namePart,
-            @RequestParam(value = "tag", defaultValue = "", required = false) String tag) {
+            @RequestParam(value = SORT, defaultValue = "ASC", required = false) String sort,
+            @RequestParam(value = SEARCH, defaultValue = "", required = false) String namePart,
+            @RequestParam(value = TAG, defaultValue = "", required = false) String tag) {
         Map<String, String> params = new HashMap<>();
-        params.put("sort", sort.toUpperCase());
-        params.put("search", namePart);
-        params.put("tag", tag);
-        List<GiftCertificateDto> resultDtos = service.getAll(page, size, params);
+        params.put(SORT, sort.toUpperCase());
+        params.put(SEARCH, namePart);
+        params.put(TAG, tag);
+        Page<GiftCertificateDto> resultDtos = service.getAll(params, PageRequest.of(page, size));
         resultDtos.forEach(hateoasUtil::attacheCertificateLink);
         return new ResponseEntity<>(resultDtos, HttpStatus.OK);
     }

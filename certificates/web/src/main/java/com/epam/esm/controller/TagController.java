@@ -5,6 +5,8 @@ import com.epam.esm.service.TagService;
 import com.epam.esm.translator.Translator;
 import com.epam.esm.util.CharsetUtil;
 import com.epam.esm.util.HateoasUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,10 +43,10 @@ public class TagController {
     }
 
     @GetMapping("/tags")
-    public ResponseEntity<List<TagDto>> getAll(
+    public ResponseEntity<Page<TagDto>> getAll(
             @RequestParam(value = "page", defaultValue = "1", required = false) int page,
             @RequestParam(value = "size", defaultValue = "5", required = false) int size) {
-        List<TagDto> resultDtos = service.getAll(page, size);
+        Page<TagDto> resultDtos = service.getAll(PageRequest.of(page, size));
         resultDtos.forEach(hateoasUtil::attacheTagLink);
         return new ResponseEntity<>(resultDtos, HttpStatus.OK);
     }

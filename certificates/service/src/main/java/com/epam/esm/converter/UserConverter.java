@@ -30,6 +30,7 @@ public class UserConverter {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .email(user.getEmail())
+                .username(user.getUsername())
                 .orderDtoList(user.getOrders() == null ? new ArrayList<>() : user.getOrders()
                         .stream().map(orderConverter::convertEntityToDto).collect(Collectors.toList()))
                 .build();

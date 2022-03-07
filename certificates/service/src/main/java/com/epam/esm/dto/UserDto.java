@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 @Builder
 @ToString
 public class UserDto extends RepresentationModel<UserDto> {
@@ -29,5 +29,8 @@ public class UserDto extends RepresentationModel<UserDto> {
     @NotNull
     @Email
     private String email;
+
+    private String username;
+
     private List<OrderDto> orderDtoList;
 }

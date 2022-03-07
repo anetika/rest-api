@@ -8,4 +8,6 @@ public class CoreMain {
     public static void main(String[] args) {
         SpringApplication.run(CoreMain.class, args);
     }
+
+
 }

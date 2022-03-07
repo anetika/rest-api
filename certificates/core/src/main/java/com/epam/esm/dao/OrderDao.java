@@ -1,6 +1,7 @@
 package com.epam.esm.dao;
 
 import com.epam.esm.entity.Order;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -9,7 +10,7 @@ import java.util.Optional;
  * The interface that contains functionality for OrderDao
  */
 @Repository
-public interface OrderDao {
+public interface OrderDao extends JpaRepository<Order, Long> {
     /**
      * Finds an order by id.
      *

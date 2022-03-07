@@ -2,6 +2,9 @@ package com.epam.esm.service;
 
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.dto.TagDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.Map;
 
@@ -28,12 +31,10 @@ public interface GiftCertificateService {
     /**
      * Gets all certificate dtos.
      *
-     * @param page   the page
-     * @param size   the size
      * @param params the params
      * @return the list of all certificate dtos
      */
-    List<GiftCertificateDto> getAll(int page, int size, Map<String, String> params);
+    Page<GiftCertificateDto> getAll(Map<String, String> params, Pageable pageable);
 
     /**
      * Deletes a certificate dto by id.

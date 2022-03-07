@@ -1,7 +1,6 @@
 package com.epam.esm.exceptionhandler;
 
 import lombok.*;
-import org.springframework.http.HttpStatus;
 
 @Getter
 @Setter
@@ -10,6 +9,5 @@ import org.springframework.http.HttpStatus;
 @Builder
 public class ExceptionMessage {
     private String errorMessage;
-    private HttpStatus errorStatus;
     private int errorCode;
 }

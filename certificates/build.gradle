@@ -1,22 +1,118 @@
+plugins {
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+    id("org.springframework.boot") version "2.6.3"
+    id("io.spring.dependency-management") version "1.0.11.RELEASE"
+    id "org.sonarqube" version "3.3"
+    id "jacoco"
+    id "war"
+}
+
 group 'org.example'
 version '1.0-SNAPSHOT'
-
 allprojects {
     apply plugin: 'java'
+    apply plugin: 'com.github.johnrengelman.shadow'
+    apply plugin: 'org.sonarqube'
+    apply plugin: 'jacoco'
+    apply plugin: 'war'
     sourceCompatibility = '11'
     targetCompatibility = '11'
+
+    ext {
+        springVersion = '2.6.2'
+        lombokVersion = '1.18.16'
+    }
 
     repositories {
         mavenCentral()
     }
 
     dependencies {
-        implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '2.6.2'
-        implementation group: 'org.springframework.boot', name: 'spring-boot-starter-hateoas', version: '2.6.2'
-        implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: '2.6.2'
+        implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.27'
+        implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: springVersion
+        implementation group: 'org.springframework.boot', name: 'spring-boot-starter-hateoas', version: springVersion
+        implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: springVersion
+        implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springVersion
+        implementation group: 'org.hibernate.javax.persistence', name: 'hibernate-jpa-2.1-api', version: '1.0.2.Final'
         implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.3'
         implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.13.1'
-        implementation 'org.projectlombok:lombok:1.18.16'
-        annotationProcessor 'org.projectlombok:lombok:1.18.20'
+        implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: '2.6.3'
+        implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+        implementation group: 'org.springframework.security.oauth.boot', name: 'spring-security-oauth2-autoconfigure', version: '2.6.3'
+        implementation group: 'org.hibernate', name: 'hibernate-entitymanager', version: '6.0.0.Alpha3', ext: 'pom'
+        compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+        annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+        testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.2.0'
+        testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springVersion
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}
+shadowJar{
+    SourceSet mainSourceSet = project.sourceSets.main
+    mainSourceSet.java.srcDirs += ['core/src/main']
+    mainSourceSet.java.srcDirs += ['service/src/main']
+    mainSourceSet.java.srcDirs += ['security/src/main']
+    mainSourceSet.java.srcDirs += ['web/src/main']
+    mainSourceSet.resources.srcDirs += ['core/src/main/resources']
+    mainSourceSet.resources.srcDirs += ['service/src/main/resources']
+    mainSourceSet.resources.srcDirs += ['security/src/main/resources']
+    mainSourceSet.resources.srcDirs += ['web/src/main/resources']
+    manifest {
+        attributes ('Main-Class': 'com.epam.esm.WebMain',
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version)
+    }
+}
+
+bootJar {
+    mainClass = 'com.epam.esm.WebMain'
+}
+
+bootWar {
+    mainClass = 'com.epam.esm.WebMain'
+}
+
+subprojects {
+    apply plugin: 'org.sonarqube'
+    sonarqube {
+        properties {
+            property 'sonar.coverage.jacoco.xmlReportPaths', "$projectDir.parentFile.path/build/reports/jacoco/codeCoverageReport/codeCoverageReport.xml"
+        }
+    }
+
+    tasks.withType(Test).configureEach {
+        useJUnitPlatform()
+    }
+}
+
+apply from: "$project.rootDir/sonar.gradle"
+
+tasks.register("codeCoverageReport", JacocoReport) {
+    subprojects { subproject ->
+        subproject.plugins.withType(JacocoPlugin).configureEach {
+            subproject.tasks.matching({ t -> t.extensions.findByType(JacocoTaskExtension) }).configureEach { testTask ->
+                if (testTask.extensions.getByType(JacocoTaskExtension).isEnabled()) {
+                    sourceSets subproject.sourceSets.main
+                    executionData(testTask)
+                }else{
+                    logger.warn('Jacoco extension is disabled for test task \'{}\' in project \'{}\'. this test task will be excluded from jacoco report.',testTask.getName(),subproject.getName())
+                }
+            }
+
+            subproject.tasks.matching({ t -> t.extensions.findByType(JacocoTaskExtension) }).forEach {
+                rootProject.tasks.codeCoverageReport.dependsOn(it)
+            }
+        }
+    }
+
+    reports {
+        xml.enabled true
+
+        html.enabled true
     }
 }

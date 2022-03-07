@@ -2,6 +2,9 @@ package com.epam.esm.dao;
 
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Map;
@@ -30,12 +33,10 @@ public interface GiftCertificateDao {
     /**
      * Finds all certificates.
      *
-     * @param page   the page
-     * @param size   the size of a page
      * @param params the params of a request
      * @return the list of certificates
      */
-    List<GiftCertificate> findAll(int page, int size, Map<String, String> params);
+    Page<GiftCertificate> findAll(Map<String, String> params, Pageable pageable);
 
     /**
      * Deletes a certificate by id.

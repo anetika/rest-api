@@ -6,9 +6,10 @@ import com.epam.esm.dao.UserDao;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;
-import org.junit.jupiter.api.Test;
+//import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -17,12 +18,17 @@ import java.util.Random;
 
 @SpringBootTest
 public class GenerationUtil {
+
     @Autowired
     private TagDao tagDao;
+
     @Autowired
     private GiftCertificateDao certificateDao;
+
     @Autowired
     private UserDao userDao;
+
+    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     private final Random random = new Random();
 
@@ -37,7 +43,7 @@ public class GenerationUtil {
 
     //@Test
     public void generateCertificates(){
-        for (int i = 0; i < 10000; i++){
+        for (int i = 3; i < 100; i++){
             GiftCertificate giftCertificate = new GiftCertificate();
             giftCertificate.setName("Certificate" + i);
             giftCertificate.setDescription("Certificate" + i + " description");
@@ -47,7 +53,7 @@ public class GenerationUtil {
             giftCertificate.setLastUpdateDate(LocalDateTime.now());
             giftCertificate.setTags(new HashSet<>());
             for (int j = 0; j < 10; j++){
-                int randomTagId = random.nextInt(1000) + 8;
+                int randomTagId = random.nextInt(1000) + 1;
                 giftCertificate.getTags().add(tagDao.findById((long) randomTagId).get());
             }
             certificateDao.save(giftCertificate);
@@ -56,11 +62,13 @@ public class GenerationUtil {
 
     //@Test
     public void generateUsers() {
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 100; i++) {
             User user = new User();
             user.setEmail("user" + i + "@mail.ru");
             user.setFirstName("User" + i);
             user.setLastName("UserLastName" + i);
+            user.setUsername("user" + i);
+            user.setPassword(passwordEncoder.encode("123456"));
             userDao.save(user);
         }
     }

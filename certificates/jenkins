@@ -1,0 +1,20 @@
+pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+        }
+        stages {
+            stage('Scan') {
+                steps {
+                    dir('./certificates') {
+                        sh 'pwd'
+                        sh 'gradle clean'
+                        sh "gradle sonarqube"
+                    }
+                    withSonarQubeEnv(installationName: 'sonarqube') {
+
+                    }
+                }
+            }
+        }
+    }
